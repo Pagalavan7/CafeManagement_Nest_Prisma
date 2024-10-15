@@ -23,5 +23,5 @@ model User_Details{
   address String
   isAdmin Boolean @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }

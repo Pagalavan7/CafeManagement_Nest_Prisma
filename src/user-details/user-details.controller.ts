@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UserDetailsService } from './user-details.service';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
 import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
@@ -8,8 +16,8 @@ export class UserDetailsController {
   constructor(private readonly userDetailsService: UserDetailsService) {}
 
   @Post()
-  create(@Body() createUserDetailDto: CreateUserDetailDto) {
-    return this.userDetailsService.create(createUserDetailDto);
+  async create(@Body() createUserDetailDto: CreateUserDetailDto) {
+    return await this.userDetailsService.create(createUserDetailDto);
   }
 
   @Get()
@@ -23,7 +31,10 @@ export class UserDetailsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDetailDto: UpdateUserDetailDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDetailDto: UpdateUserDetailDto,
+  ) {
     return this.userDetailsService.update(+id, updateUserDetailDto);
   }
 
