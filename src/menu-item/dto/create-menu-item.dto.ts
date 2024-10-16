@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDecimal,
@@ -40,5 +40,6 @@ export class CreateMenuItemDto {
 
   @IsNumber()
   @IsNotEmpty()
+  @Type(() => Number)
   categoryId: number;
 }

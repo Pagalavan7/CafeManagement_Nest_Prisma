@@ -27,7 +27,7 @@ export class MenuCategoryController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.menuCategoryService.findOne(+id);
+    return await this.menuCategoryService.findwithItems(+id);
   }
 
   @Patch(':id')

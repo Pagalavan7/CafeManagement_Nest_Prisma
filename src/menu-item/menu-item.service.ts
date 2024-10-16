@@ -15,7 +15,7 @@ export class MenuItemService {
 
   async create(createMenuItemDto: CreateMenuItemDto) {
     try {
-      const item = this.prisma.menu_Item.create({
+      const item = await this.prisma.menu_Item.create({
         data: {
           ...createMenuItemDto,
         },
@@ -26,7 +26,6 @@ export class MenuItemService {
         throw new ConflictException('Item already found.');
       }
       if (err instanceof BadRequestException) throw err;
-
       throw new InternalServerErrorException('Something went wrong');
     }
   }
@@ -69,18 +68,41 @@ export class MenuItemService {
   }
 
   async update(id: number, updateMenuItemDto: UpdateMenuItemDto) {
-    return `This action updates a #${id} menuItem`;
     try {
+      console.log('update method called');
+      const data = await this.prisma.menu_Item.update({
+        where: {
+          itemId: id,
+        },
+        data: {
+          ...updateMenuItemDto,
+        },
+      });
+
+      return data;
     } catch (err) {
-      throw new InternalServerErrorException('Something went wrong');
+      if (err instanceof BadRequestException) throw err;
+      if (err.code === 'P2025') {
+        throw new CustomException(`No item with id ${id} is found.`, 400);
+      } // Prisma error code for 'Record to update not found.'
+      throw new InternalServerErrorException('Something went wrong.');
     }
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} menuItem`;
     try {
+      const data = await this.prisma.menu_Item.delete({
+        where: {
+          itemId: id,
+        },
+      });
+      return data;
     } catch (err) {
-      throw new InternalServerErrorException('Something went wrong');
+      if (err instanceof BadRequestException) throw err;
+      if (err.code === 'P2025') {
+        throw new CustomException(`No item with id ${id} is found.`, 400);
+      } // Prisma error code for 'Record to update not found.'
+      throw new InternalServerErrorException('Something went wrong.');
     }
   }
 }

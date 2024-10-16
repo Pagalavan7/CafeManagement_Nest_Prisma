@@ -42,11 +42,14 @@ export class MenuCategoryService {
     }
   }
 
-  async findOne(id: number) {
+  async findwithItems(id: number) {
     try {
       const item = await this.prisma.menu_Category.findFirst({
         where: {
           categoryId: id,
+        },
+        include: {
+          menuItem: true,
         },
       });
       if (!item) {
@@ -58,11 +61,42 @@ export class MenuCategoryService {
       throw new InternalServerErrorException('Something went wrong');
     }
   }
-  update(id: number, updateMenuCategoryDto: UpdateMenuCategoryDto) {
-    return `This action updates a #${id} menuCategory`;
+  async update(id: number, updateMenuCategoryDto: UpdateMenuCategoryDto) {
+    try {
+      console.log('update method called');
+      const data = await this.prisma.menu_Category.update({
+        where: {
+          categoryId: id,
+        },
+        data: {
+          ...updateMenuCategoryDto,
+        },
+      });
+
+      return data;
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      if (err.code === 'P2025') {
+        throw new CustomException(`No category with id ${id} is found.`, 400);
+      } // Prisma error code for 'Record to update not found.'
+      throw new InternalServerErrorException('Something went wrong.');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} menuCategory`;
+  async remove(id: number) {
+    try {
+      const data = await this.prisma.menu_Category.delete({
+        where: {
+          categoryId: id,
+        },
+      });
+      return data;
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      if (err.code === 'P2025') {
+        throw new CustomException(`No category with id ${id} is found.`, 400);
+      } // Prisma error code for 'Record to update not found.'
+      throw new InternalServerErrorException('Something went wrong.');
+    }
   }
 }

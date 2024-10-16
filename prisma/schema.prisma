@@ -31,7 +31,7 @@ model Menu_Category{
   categoryName String @unique
   description String
   menuItem Menu_Item[]
-   createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 }
 
@@ -39,8 +39,8 @@ model Menu_Item{
   itemId Int @id @default(autoincrement())
   itemName String @unique
   description String
-  categoryId Int
-  category Menu_Category @relation(fields: [categoryId],references: [categoryId])
+  categoryId Int?
+  category Menu_Category? @relation(fields: [categoryId],references: [categoryId],onDelete:SetNull)
   price Decimal
   isAvailable Boolean @default(false)
   createdAt DateTime @default(now())
