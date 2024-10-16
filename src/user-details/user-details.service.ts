@@ -69,14 +69,21 @@ export class UserDetailsService {
   }
 
   async update(id: number, updateUserDetailDto: UpdateUserDetailDto) {
-    return await this.prisma.user_Details.update({
-      data: {
-        ...updateUserDetailDto,
-      },
-      where: {
-        userId: id,
-      },
-    });
+    try {
+      return await this.prisma.user_Details.update({
+        data: {
+          ...updateUserDetailDto,
+        },
+        where: {
+          userId: id,
+        },
+      });
+    } catch (err) {
+      if (err.code === 'P2025') {
+        throw new CustomException(`No user with id ${id} is found.`, 400);
+      }
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async remove(id: number) {
@@ -86,11 +93,10 @@ export class UserDetailsService {
           userId: id,
         },
       });
-      if (!user) throw new NotFoundException('No user found with id ' + id);
       return user;
     } catch (err) {
-      if (err instanceof NotFoundException) {
-        throw err;
+      if (err.code === 'P2025') {
+        throw new CustomException(`No user with id ${id} is found.`, 400);
       }
       throw new InternalServerErrorException('Something went wrong');
     }
