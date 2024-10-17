@@ -24,6 +24,7 @@ export class OrderItemsService {
         itemId: menuItemId,
       },
     });
+
     if (!menuItem)
       throw new NotFoundException(
         "Menu ID not found. Order items can't be added",
@@ -34,21 +35,52 @@ export class OrderItemsService {
     const orderItem = await this.prisma.order_Item.create({
       data: { ...createOrderItemDto, price: menuItemPrice },
     });
-    await this.updateTotalOrderAmount(orderItem.orderId);
+    const updatedOrder = await this.updateTotalOrderAmount(orderItem.orderId);
+    return { orderItem, order: updatedOrder };
+  }
+
+  async findAll() {
+    const orderItems = await this.prisma.order_Item.findMany();
+    if (!orderItems.length)
+      throw new NotFoundException(`No order items found.`);
+    return orderItems;
+  }
+
+  async findOne(id: number) {
+    const orderItem = await this.prisma.order_Item.findUnique({
+      where: {
+        orderItemId: id,
+      },
+    });
+    if (!orderItem) throw new NotFoundException(`No order items found.`);
     return orderItem;
   }
 
-  async findAll() {}
+  async update(id: number, updateOrderItemDto: UpdateOrderItemDto) {
+    const updatedOrderItem = await this.prisma.order_Item.update({
+      where: {
+        orderItemId: id,
+      },
+      data: {
+        ...updateOrderItemDto,
+      },
+    });
+    const order = await this.updateTotalOrderAmount(updatedOrderItem.orderId);
+    return { updatedOrderItem, order };
+  }
 
-  async findOne(id: number) {}
-
-  async update(id: number, updateOrderItemDto: UpdateOrderItemDto) {}
-
-  async remove(id: number) {}
+  async remove(id: number) {
+    const removedOrderItem = await this.prisma.order_Item.delete({
+      where: {
+        orderItemId: id,
+      },
+    });
+    if (!removedOrderItem) throw new NotFoundException(`No order items found.`);
+    const order = await this.updateTotalOrderAmount(removedOrderItem.orderId);
+    return { removedOrderItem, order };
+  }
 
   async updateTotalOrderAmount(orderId: number) {
-    console.log('order id to be updated', orderId);
-
     let orderItems = await this.prisma.order_Item.findMany({
       where: {
         orderId: orderId,
@@ -73,5 +105,6 @@ export class OrderItemsService {
         orderId: orderId,
       },
     });
+    return order;
   }
 }

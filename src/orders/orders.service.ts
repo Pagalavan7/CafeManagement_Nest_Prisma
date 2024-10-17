@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -24,8 +28,27 @@ export class OrdersService {
 
   async findAll() {
     try {
-      const order = await this.prisma.order.findMany();
-      return order;
+      const order = await this.prisma.order.findMany({
+        include: {
+          paymentStatus: {
+            select: {
+              statusName: true,
+            },
+          },
+        },
+      });
+
+      const modifiedresult = order.map((x) => ({
+        orderId: x.orderId,
+        userId: x.userId,
+        paymentStatus: x.paymentStatus.statusName,
+        paymentStatusId: x.paymentStatusId,
+        totalOrderAmount: '960',
+        createdAt: '2024-10-17T06:35:28.293Z',
+        updatedAt: '2024-10-17T10:21:59.205Z',
+      }));
+
+      return modifiedresult;
     } catch (err) {
       throw new InternalServerErrorException('Something went wrong');
     }
@@ -33,12 +56,49 @@ export class OrdersService {
 
   async findOne(id: number) {
     try {
-      const order = await this.prisma.order.findMany();
-      if (!order)
-        throw new CustomException(`No order found with id ${id} `, 400);
-      return order;
+      const order = await this.prisma.order.findFirst({
+        where: {
+          orderId: id,
+        },
+        include: {
+          orderItems: {
+            select: {
+              menuItem: {
+                select: {
+                  itemName: true,
+                },
+              },
+              price: true,
+              quantity: true,
+            },
+          },
+          paymentStatus: {
+            select: {
+              statusName: true,
+            },
+          },
+        },
+      });
+      if (!order) throw new NotFoundException(`No order found with id ${id}`);
+
+      const modifiedOrder = {
+        orderId: order.orderId,
+        userId: order.userId,
+        paymentStatus: order.paymentStatus.statusName,
+        totalOrderAmount: order.totalOrderAmount,
+
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        orderItems: order.orderItems.map((x) => ({
+          menuItemName: x.menuItem.itemName,
+          price: x.price,
+          quantity: x.quantity,
+        })),
+      };
+      return modifiedOrder;
     } catch (err) {
       if (err instanceof CustomException) throw err;
+      if (err instanceof NotFoundException) throw err;
       throw new InternalServerErrorException('Something went wrong');
     }
   }
