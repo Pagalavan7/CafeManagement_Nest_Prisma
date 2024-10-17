@@ -79,3 +79,12 @@ model Order_Item{
   updatedAt DateTime @updatedAt()
 }
 
+model Inventory{
+  inventoryItemId Int @id @default(autoincrement())
+  inventoryItemName String @unique
+  quantity Int 
+  unit String
+  restoreLevel Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
