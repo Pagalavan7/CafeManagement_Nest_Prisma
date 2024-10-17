@@ -23,6 +23,7 @@ model User_Details{
   address String
   isAdmin Boolean @default(false)
   orders Order[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -52,19 +53,27 @@ model Menu_Item{
 model Payment_Status{
   statusId Int @id @default(autoincrement())
   statusName String
-  order Order[]
+  payments Payment[]
 }
 
-model Order{
-  orderId Int @id @default(autoincrement())
+model Order {
+  orderId Int  @id @default(autoincrement())
   userId Int?
-  user User_Details? @relation(fields: [userId],references: [userId],onDelete: SetNull)
-  paymentStatusId Int
-  paymentStatus Payment_Status @relation(fields: [paymentStatusId],references: [statusId])
-  totalOrderAmount Decimal @default(0)
+  user User_Details? @relation(fields: [userId], references: [userId], onDelete: SetNull)  
+  totalOrderAmount Decimal  @default(0)
   orderItems Order_Item[]
+  payment Payment?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  paymentId Int @id @default(autoincrement())
+  orderId Int @unique
+  order Order @relation(fields: [orderId],references: [orderId])        
+  paymentStatusId Int
+  paymentStatus Payment_Status @relation(fields: [paymentStatusId], references: [statusId])
+  createdAt DateTime   @default(now())
 }
 
 model Order_Item{
@@ -88,3 +97,4 @@ model Inventory{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 }
+

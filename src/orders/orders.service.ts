@@ -30,9 +30,10 @@ export class OrdersService {
     try {
       const order = await this.prisma.order.findMany({
         include: {
-          paymentStatus: {
+          payment: {
             select: {
-              statusName: true,
+              paymentStatus: true,
+              paymentStatusId: true,
             },
           },
         },
@@ -41,15 +42,16 @@ export class OrdersService {
       const modifiedresult = order.map((x) => ({
         orderId: x.orderId,
         userId: x.userId,
-        paymentStatus: x.paymentStatus.statusName,
-        paymentStatusId: x.paymentStatusId,
-        totalOrderAmount: '960',
+        paymentStatus: x.payment ? x.payment.paymentStatus : null,
+        paymentStatusId: x.payment ? x.payment.paymentStatusId : null,
+        totalOrderAmount: x.totalOrderAmount,
         createdAt: '2024-10-17T06:35:28.293Z',
         updatedAt: '2024-10-17T10:21:59.205Z',
       }));
 
       return modifiedresult;
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('Something went wrong');
     }
   }
@@ -72,9 +74,10 @@ export class OrdersService {
               quantity: true,
             },
           },
-          paymentStatus: {
+          payment: {
             select: {
-              statusName: true,
+              paymentStatus: true,
+              paymentStatusId: true,
             },
           },
         },
@@ -84,9 +87,8 @@ export class OrdersService {
       const modifiedOrder = {
         orderId: order.orderId,
         userId: order.userId,
-        paymentStatus: order.paymentStatus.statusName,
+        paymentStatus: order.payment ? order.payment.paymentStatus : null,
         totalOrderAmount: order.totalOrderAmount,
-
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
         orderItems: order.orderItems.map((x) => ({
