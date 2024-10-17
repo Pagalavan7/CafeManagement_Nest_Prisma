@@ -20,7 +20,6 @@ export class UserDetailsService {
           ...createUserDetailDto,
         },
       });
-
       return user;
     } catch (error) {
       console.error('error is ', error); // Logging the full error to understand its structure

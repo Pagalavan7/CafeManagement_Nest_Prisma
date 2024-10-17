@@ -57,11 +57,11 @@ model Payment_Status{
 
 model Order{
   orderId Int @id @default(autoincrement())
-  userId Int
-  user User_Details @relation(fields: [userId],references: [userId],onDelete: Cascade)
+  userId Int?
+  user User_Details? @relation(fields: [userId],references: [userId],onDelete: SetNull)
   paymentStatusId Int
   paymentStatus Payment_Status @relation(fields: [paymentStatusId],references: [statusId])
-  totalOrderAmount Decimal
+  totalOrderAmount Decimal @default(0)
   orderItems Order_Item[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
@@ -70,9 +70,9 @@ model Order{
 model Order_Item{
   orderItemId Int @id @default(autoincrement())
   orderId Int
-  order Order @relation(fields: [orderId],references: [orderId])
-  menuItemId Int 
-  menuItem Menu_Item @relation(fields: [menuItemId],references: [itemId])
+  order Order @relation(fields: [orderId],references: [orderId],onDelete: Cascade)
+  menuItemId Int?
+  menuItem Menu_Item? @relation(fields: [menuItemId],references: [itemId])
   quantity Int
   price Decimal
   createdAt DateTime @default(now())
