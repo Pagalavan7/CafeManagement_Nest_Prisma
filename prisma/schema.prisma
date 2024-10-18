@@ -107,7 +107,7 @@ model Tables{
   status String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
-  reservation Reservation[] @relation("TableReservation")
+  reservation Reservation[]
 }
 
 model Reservation{
@@ -115,8 +115,8 @@ model Reservation{
   userId Int
   user User_Details @relation(fields: [userId],references: [userId])
   tableId Int
-  table Tables[] @relation("TableReservation")
-  ReservationStatus String 
+  table Tables @relation(fields: [tableId],references: [tableId])
+  members Int?
+  reservationStatus String? 
   payment Payment[] 
- 
 }

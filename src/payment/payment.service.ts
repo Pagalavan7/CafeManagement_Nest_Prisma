@@ -100,10 +100,12 @@ export class PaymentService {
             paymentStatus: paymentStatus.paymentStatus.statusName,
           };
 
-          await this.updateReservationStatus(
-            reservation.reservationId,
-            reservation.tableId,
-          );
+          if (modifiedPaymentStatus.paymentStatus == 'COMPLETED') {
+            await this.updateReservationStatus(
+              reservation.reservationId,
+              reservation.tableId,
+            );
+          }
 
           return modifiedPaymentStatus;
         } else
@@ -142,7 +144,7 @@ export class PaymentService {
       where: {
         reservationId: reservationId,
       },
-      data: { ReservationStatus: ReservationStatus.BOOKED },
+      data: { reservationStatus: ReservationStatus.BOOKED },
     });
 
     await this.prisma.tables.update({

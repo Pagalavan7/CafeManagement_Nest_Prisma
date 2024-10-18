@@ -3,6 +3,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomException } from 'src/common/exceptions/customException';
+import { TableStatus } from 'src/tables/dto/create-table.dto';
 
 @Injectable()
 export class ReservationService {
@@ -20,8 +21,13 @@ export class ReservationService {
 
     const tableAvailable = await this.prisma.tables.findFirst({
       where: {
-        capacity: {
-          gte: createReservationDto.members,
+        AND: {
+          capacity: {
+            gte: createReservationDto.members,
+          },
+          status: {
+            in: [TableStatus.AVAILABLE],
+          },
         },
       },
       orderBy: {
@@ -34,8 +40,9 @@ export class ReservationService {
     return await this.prisma.reservation.create({
       data: {
         userId: createReservationDto.userId,
-        ReservationStatus: 'Pending',
+        reservationStatus: 'Pending',
         tableId: tableAvailable.tableId,
+        members: createReservationDto.members,
       },
     });
   }
