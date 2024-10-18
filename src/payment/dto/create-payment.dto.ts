@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreatePaymentDto {
   // paymentId Int @id @default(autoincrement())
@@ -11,8 +11,13 @@ export class CreatePaymentDto {
 
   @IsNumber()
   @Type(() => Number)
-  @IsNotEmpty()
+  @IsOptional()
   orderId: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  reservationId: number;
 
   @IsNumber()
   @Type(() => Number)

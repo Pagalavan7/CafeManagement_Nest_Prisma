@@ -10,9 +10,11 @@ import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './order-items/order-items.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { PaymentModule } from './payment/payment.module';
+import { TablesModule } from './tables/tables.module';
+import { ReservationModule } from './reservation/reservation.module';
 
 @Module({
-  imports: [PrismaModule, UserDetailsModule, MenuItemModule, MenuCategoryModule, OrdersModule, OrderItemsModule, InventoryModule, PaymentModule],
+  imports: [PrismaModule, UserDetailsModule, MenuItemModule, MenuCategoryModule, OrdersModule, OrderItemsModule, InventoryModule, PaymentModule, TablesModule, ReservationModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

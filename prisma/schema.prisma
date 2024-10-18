@@ -23,7 +23,7 @@ model User_Details{
   address String
   isAdmin Boolean @default(false)
   orders Order[]
-
+  reservations Reservation[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -42,7 +42,7 @@ model Menu_Item{
   itemName String @unique
   description String
   categoryId Int?
-  category Menu_Category? @relation(fields: [categoryId],references: [categoryId],onDelete:SetNull)
+  category Menu_Category? @relation(fields: [categoryId],references: [categoryId])
   price Decimal
   isAvailable Boolean @default(false)
   createdAt DateTime @default(now())
@@ -59,7 +59,7 @@ model Payment_Status{
 model Order {
   orderId Int  @id @default(autoincrement())
   userId Int?
-  user User_Details? @relation(fields: [userId], references: [userId], onDelete: SetNull)  
+  user User_Details? @relation(fields: [userId], references: [userId],onDelete: Cascade)  
   totalOrderAmount Decimal  @default(0)
   orderItems Order_Item[]
   payments Payment[]
@@ -70,9 +70,11 @@ model Order {
 model Payment {
   paymentId Int @id @default(autoincrement())
   orderId Int?
-  order Order? @relation(fields: [orderId],references: [orderId], onDelete: SetNull)        
+  order Order? @relation(fields: [orderId],references: [orderId],onDelete: Cascade )        
   paymentStatusId Int
   paymentStatus Payment_Status @relation(fields: [paymentStatusId], references: [statusId])
+  reservationId Int?
+  Reservation Reservation? @relation(fields: [reservationId],references: [reservationId],onUpdate: NoAction,onDelete: NoAction)
   createdAt DateTime   @default(now())
 }
 
@@ -98,3 +100,23 @@ model Inventory{
   updatedAt DateTime @updatedAt()
 }
 
+model Tables{
+  tableId Int @id @default(autoincrement())
+  tableName String 
+  capacity Int 
+  status String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  reservation Reservation[] @relation("TableReservation")
+}
+
+model Reservation{
+  reservationId Int @id @default(autoincrement())
+  userId Int
+  user User_Details @relation(fields: [userId],references: [userId])
+  tableId Int
+  table Tables[] @relation("TableReservation")
+  ReservationStatus String 
+  payment Payment[] 
+ 
+}

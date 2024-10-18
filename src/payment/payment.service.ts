@@ -15,43 +15,101 @@ export class PaymentService {
 
   async create(createPaymentDto: CreatePaymentDto) {
     try {
-      const paymentsMadeForOrder = await this.prisma.payment.findMany({
-        where: {
-          orderId: createPaymentDto.orderId,
-        },
-      });
-      console.log('payments made for order', paymentsMadeForOrder);
+      if (createPaymentDto.orderId) {
+        const order = await this.prisma.order.findFirst({
+          where: { orderId: createPaymentDto.orderId },
+        });
+        if (!order)
+          throw new NotFoundException(
+            `No order with id ${createPaymentDto.orderId} is found`,
+          );
 
-      const result = paymentsMadeForOrder.filter(
-        (x) => x.paymentStatusId === 2,
-      );
-
-      if (!result.length) {
-        const paymentStatus = await this.prisma.payment.create({
-          data: { ...createPaymentDto },
-          include: {
-            paymentStatus: {
-              select: {
-                statusName: true,
-              },
-            },
+        const paymentsMadeForOrder = await this.prisma.payment.findMany({
+          where: {
+            orderId: createPaymentDto.orderId,
           },
         });
-        const modifiedPaymentStatus = {
-          paymentId: paymentStatus.paymentId,
-          orderId: paymentStatus.orderId,
-          paymentStatusId: paymentStatus.paymentStatusId,
-          paymentStatus: paymentStatus.paymentStatus.statusName,
-        };
-        console.log(modifiedPaymentStatus);
-        return modifiedPaymentStatus;
-      }
+        console.log('payments made for order', paymentsMadeForOrder);
 
-      throw new CustomException(
-        `Payment already made for order ${createPaymentDto.orderId}`,
-      );
+        const result = paymentsMadeForOrder.filter(
+          (x) => x.paymentStatusId === 2,
+        );
+
+        if (!result.length) {
+          const paymentStatus = await this.prisma.payment.create({
+            data: { ...createPaymentDto },
+            include: {
+              paymentStatus: {
+                select: {
+                  statusName: true,
+                },
+              },
+            },
+          });
+          const modifiedPaymentStatus = {
+            paymentId: paymentStatus.paymentId,
+            orderId: paymentStatus.orderId,
+            paymentStatusId: paymentStatus.paymentStatusId,
+            paymentStatus: paymentStatus.paymentStatus.statusName,
+          };
+          console.log(modifiedPaymentStatus);
+          return modifiedPaymentStatus;
+        } else
+          throw new CustomException(
+            `Payment already made for order ${createPaymentDto.orderId}`,
+            409,
+          );
+      }
+      if (createPaymentDto.reservationId) {
+        console.log('reservation id is', createPaymentDto.reservationId);
+        const reservation = await this.prisma.reservation.findFirst({
+          where: { reservationId: createPaymentDto.reservationId },
+        });
+        if (!reservation)
+          throw new NotFoundException(
+            `No reservation with id ${createPaymentDto.reservationId} is found`,
+          );
+
+        const paymentsMadeForReservation = await this.prisma.payment.findMany({
+          where: {
+            orderId: createPaymentDto.orderId,
+          },
+        });
+        console.log(
+          'payments made for reservation',
+          paymentsMadeForReservation,
+        );
+
+        const result = paymentsMadeForReservation.filter(
+          (x) => x.paymentStatusId === 2,
+        );
+
+        if (!result.length) {
+          const paymentStatus = await this.prisma.payment.create({
+            data: { ...createPaymentDto },
+            include: {
+              paymentStatus: true,
+            },
+          });
+
+          const modifiedPaymentStatus = {
+            paymentId: paymentStatus.paymentId,
+            reservationId: paymentStatus.reservationId,
+            paymentStatusId: paymentStatus.paymentStatusId,
+            paymentStatus: paymentStatus.paymentStatus.statusName,
+          };
+          console.log(modifiedPaymentStatus);
+          return modifiedPaymentStatus;
+        } else
+          throw new CustomException(
+            `Payment already made for reservation ${createPaymentDto.reservationId}`,
+            409,
+          );
+      }
     } catch (err) {
+      console.log(err);
       if (err instanceof NotFoundException) {
+        console.log(err);
         throw err;
       }
 
