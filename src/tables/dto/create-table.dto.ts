@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export enum Status {
+export enum TableStatus {
   OCCUPIED = 'OCCUPIED',
   AVAILABLE = 'AVAILABLE',
   RESERVED = 'RESERVED',

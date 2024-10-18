@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTableDto, Status } from './dto/create-table.dto';
+import { CreateTableDto, TableStatus } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -8,7 +8,7 @@ export class TablesService {
   constructor(private prisma: PrismaService) {}
   async create(createTableDto: CreateTableDto) {
     return await this.prisma.tables.create({
-      data: { ...createTableDto, status: Status.AVAILABLE },
+      data: { ...createTableDto, status: TableStatus.AVAILABLE },
     });
   }
 

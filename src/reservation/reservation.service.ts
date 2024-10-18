@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { table } from 'console';
 import { CustomException } from 'src/common/exceptions/customException';
 
 @Injectable()
@@ -19,7 +18,7 @@ export class ReservationService {
         `User with ID ${createReservationDto.userId} not found`,
       );
 
-    const tableAvailable = await this.prisma.tables.findMany({
+    const tableAvailable = await this.prisma.tables.findFirst({
       where: {
         capacity: {
           gte: createReservationDto.members,
@@ -30,27 +29,42 @@ export class ReservationService {
       },
     });
 
-    if (!tableAvailable.length)
-      throw new CustomException('Table Not available', 404);
+    if (!tableAvailable) throw new CustomException('Table Not available', 404);
 
     return await this.prisma.reservation.create({
-      data: { ...createReservationDto, ReservationStatus: 'Pending' },
+      data: {
+        userId: createReservationDto.userId,
+        ReservationStatus: 'Pending',
+        tableId: tableAvailable.tableId,
+      },
     });
   }
 
   async findAll() {
-    return await `This action returns all reservation`;
+    return await this.prisma.reservation.findMany();
   }
 
   async findOne(id: number) {
-    return await `This action returns a #${id} reservation`;
+    return await this.prisma.reservation.findFirst({
+      where: {
+        reservationId: id,
+      },
+      include: {
+        payment: true,
+      },
+    });
   }
 
   async update(id: number, updateReservationDto: UpdateReservationDto) {
-    return await `This action updates a #${id} reservation`;
+    return await this.prisma.reservation.update({
+      where: { reservationId: id },
+      data: { ...updateReservationDto },
+    });
   }
 
   async remove(id: number) {
-    return await `This action removes a #${id} reservation`;
+    return await this.prisma.reservation.delete({
+      where: { reservationId: id },
+    });
   }
 }

@@ -20,10 +20,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   userId: number;
 
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  tableId: number;
+  // @IsNumber()
+  // @Type(() => Number)
+  // @IsNotEmpty()
+  // tableId: number;
 
   @IsNumber()
   @Type(() => Number)

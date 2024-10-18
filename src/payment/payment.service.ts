@@ -8,6 +8,8 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomException } from 'src/common/exceptions/customException';
+import { ReservationStatus } from 'src/reservation/dto/create-reservation.dto';
+import { TableStatus } from 'src/tables/dto/create-table.dto';
 
 @Injectable()
 export class PaymentService {
@@ -16,6 +18,7 @@ export class PaymentService {
   async create(createPaymentDto: CreatePaymentDto) {
     try {
       if (createPaymentDto.orderId) {
+        //payment for order
         const order = await this.prisma.order.findFirst({
           where: { orderId: createPaymentDto.orderId },
         });
@@ -61,10 +64,12 @@ export class PaymentService {
           );
       }
       if (createPaymentDto.reservationId) {
+        //payment for reservation
         console.log('reservation id is', createPaymentDto.reservationId);
         const reservation = await this.prisma.reservation.findFirst({
           where: { reservationId: createPaymentDto.reservationId },
         });
+        console.log('reservation is ', reservation);
         if (!reservation)
           throw new NotFoundException(
             `No reservation with id ${createPaymentDto.reservationId} is found`,
@@ -72,13 +77,9 @@ export class PaymentService {
 
         const paymentsMadeForReservation = await this.prisma.payment.findMany({
           where: {
-            orderId: createPaymentDto.orderId,
+            reservationId: createPaymentDto.reservationId,
           },
         });
-        console.log(
-          'payments made for reservation',
-          paymentsMadeForReservation,
-        );
 
         const result = paymentsMadeForReservation.filter(
           (x) => x.paymentStatusId === 2,
@@ -98,7 +99,12 @@ export class PaymentService {
             paymentStatusId: paymentStatus.paymentStatusId,
             paymentStatus: paymentStatus.paymentStatus.statusName,
           };
-          console.log(modifiedPaymentStatus);
+
+          await this.updateReservationStatus(
+            reservation.reservationId,
+            reservation.tableId,
+          );
+
           return modifiedPaymentStatus;
         } else
           throw new CustomException(
@@ -127,6 +133,24 @@ export class PaymentService {
     return await this.prisma.payment.findUnique({
       where: {
         paymentId: id,
+      },
+    });
+  }
+
+  async updateReservationStatus(reservationId, tableId) {
+    await this.prisma.reservation.update({
+      where: {
+        reservationId: reservationId,
+      },
+      data: { ReservationStatus: ReservationStatus.BOOKED },
+    });
+
+    await this.prisma.tables.update({
+      where: {
+        tableId: tableId,
+      },
+      data: {
+        status: TableStatus.RESERVED,
       },
     });
   }
