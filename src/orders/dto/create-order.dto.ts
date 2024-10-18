@@ -6,9 +6,9 @@ export class CreateOrderDto {
   @IsNotEmpty()
   userId: number;
 
-  @Type(() => Number)
-  @IsNotEmpty()
-  paymentStatusId: number;
+  // @Type(() => Number)
+  // @IsNotEmpty()
+  // paymentStatusId: number;
 
   // @Type(() => Number)
   // @IsNotEmpty()

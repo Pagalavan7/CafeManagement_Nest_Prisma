@@ -62,15 +62,15 @@ model Order {
   user User_Details? @relation(fields: [userId], references: [userId], onDelete: SetNull)  
   totalOrderAmount Decimal  @default(0)
   orderItems Order_Item[]
-  payment Payment?
+  payments Payment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Payment {
   paymentId Int @id @default(autoincrement())
-  orderId Int @unique
-  order Order @relation(fields: [orderId],references: [orderId])        
+  orderId Int?
+  order Order? @relation(fields: [orderId],references: [orderId], onDelete: SetNull)        
   paymentStatusId Int
   paymentStatus Payment_Status @relation(fields: [paymentStatusId], references: [statusId])
   createdAt DateTime   @default(now())

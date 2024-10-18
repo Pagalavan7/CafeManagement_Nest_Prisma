@@ -1,26 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CustomException } from 'src/common/exceptions/customException';
 
 @Injectable()
 export class PaymentService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createPaymentDto: CreatePaymentDto) {
+    try {
+      const paymentsMadeForOrder = await this.prisma.payment.findMany({
+        where: {
+          orderId: createPaymentDto.orderId,
+        },
+      });
+      console.log('payments made for order', paymentsMadeForOrder);
+
+      const result = paymentsMadeForOrder.filter(
+        (x) => x.paymentStatusId === 2,
+      );
+
+      if (!result.length) {
+        const paymentStatus = await this.prisma.payment.create({
+          data: { ...createPaymentDto },
+          include: {
+            paymentStatus: {
+              select: {
+                statusName: true,
+              },
+            },
+          },
+        });
+        const modifiedPaymentStatus = {
+          paymentId: paymentStatus.paymentId,
+          orderId: paymentStatus.orderId,
+          paymentStatusId: paymentStatus.paymentStatusId,
+          paymentStatus: paymentStatus.paymentStatus.statusName,
+        };
+        console.log(modifiedPaymentStatus);
+        return modifiedPaymentStatus;
+      }
+
+      throw new CustomException(
+        `Payment already made for order ${createPaymentDto.orderId}`,
+      );
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      }
+
+      if (err instanceof CustomException)
+        throw new ConflictException(err.message);
+      throw new InternalServerErrorException('something went wrong');
+    }
   }
 
-  findAll() {
-    return `This action returns all payment`;
+  async findAll() {
+    return await this.prisma.payment.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
-
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+  async findOne(id: number) {
+    return await this.prisma.payment.findUnique({
+      where: {
+        paymentId: id,
+      },
+    });
   }
 }

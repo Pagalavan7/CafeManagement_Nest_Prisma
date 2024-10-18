@@ -14,6 +14,16 @@ export class OrdersService {
 
   async create(createOrderDto: CreateOrderDto) {
     try {
+      const userExists = await this.prisma.user_Details.findUnique({
+        where: { userId: createOrderDto.userId },
+      });
+
+      if (!userExists) {
+        throw new NotFoundException(
+          `User with ID ${createOrderDto.userId} not found.`,
+        );
+      }
+
       const order = await this.prisma.order.create({
         data: {
           ...createOrderDto,
@@ -21,35 +31,15 @@ export class OrdersService {
       });
       return order;
     } catch (err) {
-      console.log(err);
+      if (err instanceof NotFoundException) throw err;
       throw new InternalServerErrorException('Something went wrong..');
     }
   }
 
   async findAll() {
     try {
-      const order = await this.prisma.order.findMany({
-        include: {
-          payment: {
-            select: {
-              paymentStatus: true,
-              paymentStatusId: true,
-            },
-          },
-        },
-      });
-
-      const modifiedresult = order.map((x) => ({
-        orderId: x.orderId,
-        userId: x.userId,
-        paymentStatus: x.payment ? x.payment.paymentStatus : null,
-        paymentStatusId: x.payment ? x.payment.paymentStatusId : null,
-        totalOrderAmount: x.totalOrderAmount,
-        createdAt: '2024-10-17T06:35:28.293Z',
-        updatedAt: '2024-10-17T10:21:59.205Z',
-      }));
-
-      return modifiedresult;
+      const order = await this.prisma.order.findMany({});
+      return order;
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException('Something went wrong');
@@ -74,10 +64,9 @@ export class OrdersService {
               quantity: true,
             },
           },
-          payment: {
-            select: {
+          payments: {
+            include: {
               paymentStatus: true,
-              paymentStatusId: true,
             },
           },
         },
@@ -87,8 +76,13 @@ export class OrdersService {
       const modifiedOrder = {
         orderId: order.orderId,
         userId: order.userId,
-        paymentStatus: order.payment ? order.payment.paymentStatus : null,
+
         totalOrderAmount: order.totalOrderAmount,
+        paymentStatus: order.payments.map((x) => ({
+          paymentId: x.paymentId,
+          StatusName: x.paymentStatus.statusName,
+          StatusId: x.paymentStatus.statusId,
+        })),
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
         orderItems: order.orderItems.map((x) => ({
