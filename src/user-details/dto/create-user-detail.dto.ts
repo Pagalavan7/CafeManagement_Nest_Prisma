@@ -10,6 +10,13 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+
+export enum UserRole {
+  Customer = 'CUSTOMER',
+  Admin = 'ADMIN',
+  Employee = 'EMPLOYEE',
+}
+
 export class CreateUserDetailDto {
   @IsString()
   @IsNotEmpty()
@@ -36,14 +43,16 @@ export class CreateUserDetailDto {
   @IsNotEmpty()
   address: string;
 
-  @IsBoolean()
-  @Transform(({ value }) => {
-    if (value === 'true') {
-      return true;
-    } else if (value === 'false') {
-      return false;
-    }
-  })
-  @IsOptional()
-  isAdmin: boolean;
+  // @IsBoolean()
+  // @Transform(({ value }) => {
+  //   if (value === 'true') {
+  //     return true;
+  //   } else if (value === 'false') {
+  //     return false;
+  //   }
+  // })
+
+  // @IsEnum()
+  // @IsOptional()
+  // role: string;
 }
