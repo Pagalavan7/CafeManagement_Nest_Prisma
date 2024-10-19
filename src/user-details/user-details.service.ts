@@ -48,6 +48,14 @@ export class UserDetailsService {
     }
   }
 
+  async findUserByEmail(email: string) {
+    return this.prisma.user_Details.findFirst({
+      where: {
+        email: email,
+      },
+    });
+  }
+
   async findOne(id: number) {
     try {
       const user = await this.prisma.user_Details.findFirst({
