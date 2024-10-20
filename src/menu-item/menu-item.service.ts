@@ -7,7 +7,7 @@ import {
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CustomException } from 'src/common/exceptions/customException';
+import { CustomException } from 'src/common/customException';
 
 @Injectable()
 export class MenuItemService {

@@ -7,7 +7,7 @@ import {
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
 import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CustomException } from 'src/common/exceptions/customException';
+import { CustomException } from 'src/common/customException';
 
 @Injectable()
 export class UserDetailsService {

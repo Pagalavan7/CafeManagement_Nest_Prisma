@@ -6,12 +6,18 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { MenuItemService } from './menu-item.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/common/roles.decorator';
+import { UserRole } from 'src/user-details/dto/create-user-detail.dto';
 
 @Controller('menu-item')
+@UseGuards(RolesGuard)
+@Roles(UserRole.Admin)
 export class MenuItemController {
   constructor(private readonly menuItemService: MenuItemService) {}
 

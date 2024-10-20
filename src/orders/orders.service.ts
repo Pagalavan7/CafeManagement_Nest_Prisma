@@ -6,7 +6,7 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CustomException } from 'src/common/exceptions/customException';
+import { CustomException } from 'src/common/customException';
 
 @Injectable()
 export class OrdersService {

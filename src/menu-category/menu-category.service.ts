@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CustomException } from 'src/common/exceptions/customException';
+import { CustomException } from 'src/common/customException';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
 
 @Injectable()

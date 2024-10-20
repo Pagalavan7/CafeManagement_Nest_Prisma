@@ -7,7 +7,7 @@ import {
 import { CreatePaymentDto } from './dto/create-payment.dto';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CustomException } from 'src/common/exceptions/customException';
+import { CustomException } from 'src/common/customException';
 import { ReservationStatus } from 'src/reservation/dto/create-reservation.dto';
 import { TableStatus } from 'src/tables/dto/create-table.dto';
 

@@ -6,15 +6,20 @@ import {
 } from '@nestjs/common';
 import { CreateUserDetailDto } from 'src/user-details/dto/create-user-detail.dto';
 import { UserDetailsService } from 'src/user-details/user-details.service';
-import { JWTService } from './jwt.service';
+import { JsonWebTokenService } from './jwt.service';
 import { LoginUserDTO } from './dto/login-user.dto';
 import { BcryptService } from './hash.service';
+
+export interface TokenPayload {
+  userEmail: string;
+  userRole: string;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserDetailsService,
-    private JWTService: JWTService,
+    private JWTService: JsonWebTokenService,
     private bcryptService: BcryptService,
   ) {}
 
@@ -31,7 +36,10 @@ export class AuthService {
 
     const user = await this.userService.create(createUserDTO);
 
-    const payload = { userEmail: user.email, userRole: user.role };
+    const payload: TokenPayload = {
+      userEmail: user.email,
+      userRole: user.role,
+    };
     const token = await this.JWTService.generateToken(payload);
     return { token: token };
   }
