@@ -15,6 +15,7 @@ import { ReservationModule } from './reservation/reservation.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { RolesModule } from './roles/roles.module';
+import { EmployeeModule } from './employee/employee.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RolesModule } from './roles/roles.module';
     ReservationModule,
     AuthModule,
     RolesModule,
+    EmployeeModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

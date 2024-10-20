@@ -44,7 +44,7 @@ model Employee{
   employeeId Int @id @default(autoincrement())
   userId Int @unique
   user User_Details @relation(fields: [userId],references: [userId],onDelete: Cascade,onUpdate: Cascade)
-  employeeRoleId Int @unique
+  employeeRoleId Int
   role Roles @relation(fields: [employeeRoleId],references: [roleId],onDelete: NoAction,onUpdate: NoAction) 
 }
 
