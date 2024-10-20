@@ -45,18 +45,63 @@ export class EmployeeService {
   }
 
   async findAll() {
-    return await `This action returns all employee`;
+    const employees = await this.prisma.employee.findMany({
+      include: {
+        role: true,
+        user: true,
+      },
+    });
+
+    const modified = employees.map((x) => ({
+      employeeId: x.employeeId,
+      userName: x.user.firstName,
+      employeeRoleId: x.employeeRoleId,
+      role: x.role.role,
+    }));
+
+    return modified;
   }
 
   async findOne(id: number) {
-    return await `This action returns a #${id} employee`;
+    const employee = await this.prisma.employee.findFirst({
+      where: { employeeId: id },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        role: {
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    const modified = {
+      employeeId: employee.employeeId,
+      firstName: employee.user.firstName,
+      lastName: employee.user.lastName,
+      email: employee.user.email,
+      employeeRoleId: employee.employeeRoleId,
+      employeeRole: employee.role.role,
+    };
+    return modified;
   }
 
   async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    return await `This action updates a #${id} employee`;
+    return await this.prisma.employee.update({
+      data: { ...updateEmployeeDto },
+      where: { employeeId: id },
+    });
   }
 
   async remove(id: number) {
-    return await `This action removes a #${id} employee`;
+    return await this.prisma.employee.delete({
+      where: { employeeId: id },
+    });
   }
 }
