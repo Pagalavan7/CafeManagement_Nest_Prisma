@@ -21,11 +21,31 @@ model User_Details{
   password String
   phoneNumber String
   address String
-  role String @default("CUSTOMER")
+  roleId Int
+  role Roles @relation(fields: [roleId],references: [roleId],onDelete: SetDefault,onUpdate: Cascade)
+
+  employee Employee? 
   orders Order[]
   reservations Reservation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Roles{
+  roleId Int @id @default(autoincrement())
+  role String
+  employee Employee[]
+  user User_Details[]
+
+}
+
+model Employee{
+  employeeId Int @id @default(autoincrement())
+  userId Int @unique
+  user User_Details @relation(fields: [userId],references: [userId],onDelete: Cascade,onUpdate: Cascade)
+  employeeRoleId Int @unique
+  role Roles @relation(fields: [employeeRoleId],references: [roleId],onDelete: NoAction,onUpdate: NoAction) 
 }
 
 model Menu_Category{
@@ -120,3 +140,4 @@ model Reservation{
   reservationStatus String? 
   payment Payment[] 
 }
+
