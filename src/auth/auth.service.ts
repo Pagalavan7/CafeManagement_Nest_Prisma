@@ -38,7 +38,7 @@ export class AuthService {
 
     const payload: TokenPayload = {
       userEmail: user.email,
-      userRole: user.role,
+      userRole: user.role.role,
     };
     const token = await this.JWTService.generateToken(payload);
     return { token: token };
@@ -64,7 +64,7 @@ export class AuthService {
       );
     }
 
-    const payload = { userEmail: user.email, userRole: user.role };
+    const payload = { userEmail: user.email, userRole: user.role.role };
     const token = await this.JWTService.generateToken(payload);
     return { token: token };
   }

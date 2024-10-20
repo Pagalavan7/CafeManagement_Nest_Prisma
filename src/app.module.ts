@@ -14,6 +14,7 @@ import { TablesModule } from './tables/tables.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth/auth.middleware';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -28,15 +29,16 @@ import { AuthMiddleware } from './auth/auth.middleware';
     TablesModule,
     ReservationModule,
     AuthModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      .exclude('/auth/signup', '/auth/login')
-      .forRoutes('*');
+    // consumer
+    //   .apply(AuthMiddleware)
+    //   .exclude('/auth/signup', '/auth/login')
+    //   .forRoutes('*');
   }
 }

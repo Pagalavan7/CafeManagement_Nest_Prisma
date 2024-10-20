@@ -19,6 +19,11 @@ export class UserDetailsService {
         data: {
           ...createUserDetailDto,
         },
+        include: {
+          role: {
+            select: { role: true },
+          },
+        },
       });
       return user;
     } catch (error) {
@@ -52,6 +57,11 @@ export class UserDetailsService {
     return this.prisma.user_Details.findFirst({
       where: {
         email: email,
+      },
+      include: {
+        role: {
+          select: { role: true },
+        },
       },
     });
   }
