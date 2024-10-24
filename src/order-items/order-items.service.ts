@@ -91,7 +91,7 @@ export class OrderItemsService {
     console.log(orderItems);
 
     let totalOrderAmount = orderItems.reduce((sum, item) => {
-      sum = sum + item.price.toNumber() * item.quantity;
+      sum = sum + item.price * item.quantity;
       return sum;
     }, 0);
 

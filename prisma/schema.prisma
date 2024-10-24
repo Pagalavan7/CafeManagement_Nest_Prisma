@@ -34,7 +34,7 @@ model User_Details{
 
 model Roles{
   roleId Int @id @default(autoincrement())
-  role String
+  role String @unique
   employee Employee[]
   user User_Details[]
 
@@ -63,7 +63,7 @@ model Menu_Item{
   description String
   categoryId Int?
   category Menu_Category? @relation(fields: [categoryId],references: [categoryId])
-  price Decimal
+  price Float
   isAvailable Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
@@ -80,7 +80,7 @@ model Order {
   orderId Int  @id @default(autoincrement())
   userId Int?
   user User_Details? @relation(fields: [userId], references: [userId],onDelete: Cascade)  
-  totalOrderAmount Decimal  @default(0)
+  totalOrderAmount Float  @default(0)
   orderItems Order_Item[]
   payments Payment[]
   createdAt DateTime @default(now())
@@ -94,6 +94,7 @@ model Payment {
   paymentStatusId Int
   paymentStatus Payment_Status @relation(fields: [paymentStatusId], references: [statusId])
   reservationId Int?
+  paymentAmount Float @default(0)
   Reservation Reservation? @relation(fields: [reservationId],references: [reservationId],onUpdate: NoAction,onDelete: NoAction)
   createdAt DateTime   @default(now())
 }
@@ -105,7 +106,7 @@ model Order_Item{
   menuItemId Int?
   menuItem Menu_Item? @relation(fields: [menuItemId],references: [itemId])
   quantity Int
-  price Decimal
+  price Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 }
@@ -122,12 +123,23 @@ model Inventory{
 
 model Tables{
   tableId Int @id @default(autoincrement())
-  tableName String 
+  tableName String @unique
   capacity Int 
   status String
+  maxHrs Int @default(1)
+  price TablePrice?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
   reservation Reservation[]
+}
+
+model TablePrice{
+  tablePriceId Int @id @default(autoincrement())
+  tableId Int @unique
+  table Tables @relation(fields: [tableId],references: [tableId])
+
+  pricePerHour Float
+  hoursDiscount Int @default(10) 
 }
 
 model Reservation{
@@ -137,6 +149,8 @@ model Reservation{
   tableId Int
   table Tables @relation(fields: [tableId],references: [tableId])
   members Int?
+  totalHrs Int
+  totalPrice Float 
   reservationStatus String? 
   payment Payment[] 
 }

@@ -12,9 +12,6 @@ export class EmployeeService {
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto) {
-    //check email already present..
-    //if present, update role as employee and add a employee..
-    //if not present create a new user and add a employee..
     const { employeeRoleId, ...createUserDTO } = createEmployeeDto;
 
     const isUserPresent = await this.userService.findUserByEmail(

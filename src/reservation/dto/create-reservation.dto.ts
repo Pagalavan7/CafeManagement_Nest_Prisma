@@ -8,25 +8,18 @@ export enum ReservationStatus {
 }
 
 export class CreateReservationDto {
-  // resevationId Int @id @default(autoincrement())
-  // userId Int
-  // user User_Details @relation(fields: [userId],references: [userId])
-  // tableId Int
-  // table Tables[] @relation("TableReservation")
-  // status String
-
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   userId: number;
 
-  // @IsNumber()
-  // @Type(() => Number)
-  // @IsNotEmpty()
-  // tableId: number;
-
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   members: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  totalHrs: number;
 }

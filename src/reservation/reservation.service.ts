@@ -16,7 +16,7 @@ export class ReservationService {
     });
     if (!user)
       throw new NotFoundException(
-        `User with ID ${createReservationDto.userId} not found`,
+        `User with ID ${createReservationDto.userId} not found. Sign up and continue`,
       );
 
     const tableAvailable = await this.prisma.tables.findFirst({
@@ -26,7 +26,7 @@ export class ReservationService {
             gte: createReservationDto.members,
           },
           status: {
-            in: [TableStatus.AVAILABLE],
+            equals: TableStatus.AVAILABLE,
           },
         },
       },
@@ -35,7 +35,18 @@ export class ReservationService {
       },
     });
 
-    if (!tableAvailable) throw new CustomException('Table Not available', 404);
+    if (!tableAvailable)
+      throw new CustomException(
+        'Table Not available. Please use different slot!',
+        404,
+      );
+
+    // have to calculate price..
+    const totalPrice = await this.calculateTablePrice(
+      tableAvailable.tableId,
+      createReservationDto.members,
+      createReservationDto.totalHrs,
+    );
 
     return await this.prisma.reservation.create({
       data: {
@@ -43,8 +54,30 @@ export class ReservationService {
         reservationStatus: 'Pending',
         tableId: tableAvailable.tableId,
         members: createReservationDto.members,
+        totalHrs: createReservationDto.totalHrs,
+        totalPrice: totalPrice,
       },
     });
+  }
+
+  async calculateTablePrice(
+    tableId: number,
+    members: number,
+    totalHrs: number,
+  ) {
+    const priceDetails = await this.prisma.tablePrice.findFirst({
+      where: { tableId: tableId },
+    });
+
+    let { pricePerHour, hoursDiscount } = priceDetails;
+
+    let basePrice = members * pricePerHour;
+    if (totalHrs > 1) {
+      let discountPrice = ((basePrice * hoursDiscount) / 100) * (totalHrs - 1);
+      basePrice = basePrice - discountPrice;
+    }
+
+    return basePrice;
   }
 
   async findAll() {

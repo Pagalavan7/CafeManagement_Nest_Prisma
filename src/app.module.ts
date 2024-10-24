@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { RolesModule } from './roles/roles.module';
 import { EmployeeModule } from './employee/employee.module';
+import { TablePriceModule } from './table-price/table-price.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { EmployeeModule } from './employee/employee.module';
     AuthModule,
     RolesModule,
     EmployeeModule,
+    TablePriceModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
