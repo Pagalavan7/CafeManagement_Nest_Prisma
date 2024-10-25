@@ -17,28 +17,32 @@ export class PaymentService {
 
   async create(createPaymentDto: CreatePaymentDto) {
     try {
+      //payment for order
       if (createPaymentDto.orderId) {
-        //payment for order
         const order = await this.prisma.order.findFirst({
           where: { orderId: createPaymentDto.orderId },
         });
+
         if (!order)
           throw new NotFoundException(
             `No order with id ${createPaymentDto.orderId} is found`,
           );
 
-        const paymentsMadeForOrder = await this.prisma.payment.findMany({
+        //checking whether payment already made and succeeded..
+        const payment = await this.prisma.payment.findMany({
           where: {
             orderId: createPaymentDto.orderId,
           },
         });
-        console.log('payments made for order', paymentsMadeForOrder);
+        console.log('payments made for order', payment);
 
-        const result = paymentsMadeForOrder.filter(
-          (x) => x.paymentStatusId === 2,
-        );
+        const result = payment.filter((x) => x.paymentStatusId === 2);
 
         if (!result.length) {
+          createPaymentDto = {
+            ...createPaymentDto,
+            paymentAmount: order.totalOrderAmount,
+          };
           const paymentStatus = await this.prisma.payment.create({
             data: { ...createPaymentDto },
             include: {
@@ -49,9 +53,12 @@ export class PaymentService {
               },
             },
           });
+
           const modifiedPaymentStatus = {
             paymentId: paymentStatus.paymentId,
             orderId: paymentStatus.orderId,
+            amountToBePaid: paymentStatus.paymentAmount,
+            amountPaid: paymentStatus.paymentAmount,
             paymentStatusId: paymentStatus.paymentStatusId,
             paymentStatus: paymentStatus.paymentStatus.statusName,
           };
@@ -63,13 +70,13 @@ export class PaymentService {
             409,
           );
       }
+
+      //payment for reservation
       if (createPaymentDto.reservationId) {
-        //payment for reservation
-        console.log('reservation id is', createPaymentDto.reservationId);
         const reservation = await this.prisma.reservation.findFirst({
           where: { reservationId: createPaymentDto.reservationId },
         });
-        console.log('reservation is ', reservation);
+
         if (!reservation)
           throw new NotFoundException(
             `No reservation with id ${createPaymentDto.reservationId} is found`,
@@ -86,26 +93,38 @@ export class PaymentService {
         );
 
         if (!result.length) {
-          const paymentStatus = await this.prisma.payment.create({
+          createPaymentDto = {
+            ...createPaymentDto,
+            paymentAmount: reservation.totalPrice,
+          };
+
+          const payment = await this.prisma.payment.create({
             data: { ...createPaymentDto },
             include: {
               paymentStatus: true,
             },
           });
 
-          const modifiedPaymentStatus = {
-            paymentId: paymentStatus.paymentId,
-            reservationId: paymentStatus.reservationId,
-            paymentStatusId: paymentStatus.paymentStatusId,
-            paymentStatus: paymentStatus.paymentStatus.statusName,
-          };
-
-          if (modifiedPaymentStatus.paymentStatus == 'COMPLETED') {
+          if (payment.paymentStatus.statusName == 'SUCCESS') {
+            //if payment success .. update the reservation, table and payment amount..
+            await this.updatePaymentAmount(
+              payment.paymentId,
+              reservation.totalPrice,
+            );
             await this.updateReservationStatus(
               reservation.reservationId,
               reservation.tableId,
             );
           }
+
+          const modifiedPaymentStatus = {
+            paymentId: payment.paymentId,
+            reservationId: payment.reservationId,
+            amountToBePaid: payment.paymentAmount,
+            amountPaid: payment.paymentAmount,
+            paymentStatusId: payment.paymentStatusId,
+            paymentStatus: payment.paymentStatus.statusName,
+          };
 
           return modifiedPaymentStatus;
         } else
@@ -136,6 +155,15 @@ export class PaymentService {
       where: {
         paymentId: id,
       },
+    });
+  }
+
+  async updatePaymentAmount(id: number, paymentAmount: number) {
+    return await this.prisma.payment.update({
+      where: {
+        paymentId: id,
+      },
+      data: { paymentAmount: paymentAmount },
     });
   }
 

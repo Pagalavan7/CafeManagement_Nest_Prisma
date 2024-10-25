@@ -14,6 +14,7 @@ export class ReservationService {
         userId: createReservationDto.userId,
       },
     });
+
     if (!user)
       throw new NotFoundException(
         `User with ID ${createReservationDto.userId} not found. Sign up and continue`,
@@ -25,6 +26,7 @@ export class ReservationService {
           capacity: {
             gte: createReservationDto.members,
           },
+
           status: {
             equals: TableStatus.AVAILABLE,
           },
@@ -41,6 +43,11 @@ export class ReservationService {
         404,
       );
 
+    const timings = await this.calculateTimings(
+      createReservationDto.bookingStartTime,
+      createReservationDto.totalHrs,
+    );
+
     // have to calculate price..
     const totalPrice = await this.calculateTablePrice(
       tableAvailable.tableId,
@@ -56,6 +63,8 @@ export class ReservationService {
         members: createReservationDto.members,
         totalHrs: createReservationDto.totalHrs,
         totalPrice: totalPrice,
+        bookingStartTime: null,
+        bookingEndTime: 'null',
       },
     });
   }
@@ -78,6 +87,11 @@ export class ReservationService {
     }
 
     return basePrice;
+  }
+
+  calculateTimings(startTime: string, totalHrs: number) {
+    //converting timings to date object and calculate total hrs.. and return start time and end time as object
+    // {startTime:startTime,endTime:endTime}
   }
 
   async findAll() {

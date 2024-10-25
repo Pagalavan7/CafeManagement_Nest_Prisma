@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber } from 'class-validator';
 
 export enum ReservationStatus {
   BOOKED = 'Booked',
@@ -17,6 +17,9 @@ export class CreateReservationDto {
   @Type(() => Number)
   @IsNotEmpty()
   members: number;
+
+  @IsDateString()
+  bookingStartTime: string;
 
   @IsNumber()
   @Type(() => Number)

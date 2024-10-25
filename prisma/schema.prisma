@@ -137,7 +137,6 @@ model TablePrice{
   tablePriceId Int @id @default(autoincrement())
   tableId Int @unique
   table Tables @relation(fields: [tableId],references: [tableId])
-
   pricePerHour Float
   hoursDiscount Int @default(10) 
 }
@@ -149,6 +148,8 @@ model Reservation{
   tableId Int
   table Tables @relation(fields: [tableId],references: [tableId])
   members Int?
+  bookingStartTime DateTime 
+  bookingEndTime DateTime
   totalHrs Int
   totalPrice Float 
   reservationStatus String? 
