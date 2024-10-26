@@ -3,7 +3,6 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomException } from 'src/common/customException';
-import { TableStatus } from 'src/tables/dto/create-table.dto';
 
 @Injectable()
 export class ReservationService {
