@@ -148,8 +148,10 @@ model Reservation{
   user User_Details @relation(fields: [userId],references: [userId])
   tableId Int
   table Tables @relation(fields: [tableId],references: [tableId])
-  members Int?
+  members Int
   totalHrs Int
+  bookingStartTime DateTime?
+  bookingEndTime DateTime?
   totalPrice Float 
   reservationStatus String? 
   payment Payment[] 

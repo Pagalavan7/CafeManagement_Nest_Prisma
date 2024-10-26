@@ -35,7 +35,7 @@ export class PaymentService {
         console.log('payments made for order', paymentsMadeForOrder);
 
         const result = paymentsMadeForOrder.filter(
-          (x) => x.paymentStatusId === 2,
+          (x) => x.paymentStatusId === 1,
         );
 
         if (!result.length) {
@@ -64,7 +64,6 @@ export class PaymentService {
           );
       }
       if (createPaymentDto.reservationId) {
-        //payment for reservation
         console.log('reservation id is', createPaymentDto.reservationId);
         const reservation = await this.prisma.reservation.findFirst({
           where: { reservationId: createPaymentDto.reservationId },
@@ -82,7 +81,7 @@ export class PaymentService {
         });
 
         const result = paymentsMadeForReservation.filter(
-          (x) => x.paymentStatusId === 2,
+          (x) => x.paymentStatusId === 1,
         );
 
         if (!result.length) {
@@ -145,15 +144,6 @@ export class PaymentService {
         reservationId: reservationId,
       },
       data: { reservationStatus: ReservationStatus.BOOKED },
-    });
-
-    await this.prisma.tables.update({
-      where: {
-        tableId: tableId,
-      },
-      data: {
-        status: TableStatus.RESERVED,
-      },
     });
   }
 }

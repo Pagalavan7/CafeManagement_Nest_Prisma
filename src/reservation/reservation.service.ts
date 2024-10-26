@@ -19,16 +19,43 @@ export class ReservationService {
         `User with ID ${createReservationDto.userId} not found. Sign up and continue`,
       );
 
+    const timings = await this.calculateTime(
+      createReservationDto.bookingStartTime,
+      createReservationDto.totalHrs,
+    );
+
     const tableAvailable = await this.prisma.tables.findFirst({
       where: {
-        AND: {
-          capacity: {
-            gte: createReservationDto.members,
+        AND: [
+          {
+            capacity: {
+              gte: createReservationDto.members,
+            },
           },
-          status: {
-            equals: TableStatus.AVAILABLE,
+          // {
+          //   status: {
+          //     equals: TableStatus.AVAILABLE,
+          //   },
+          // },
+          {
+            reservation: {
+              every: {
+                OR: [
+                  {
+                    bookingStartTime: {
+                      gte: timings.endTime,
+                    },
+                  },
+                  {
+                    bookingEndTime: {
+                      lte: timings.startTime,
+                    },
+                  },
+                ],
+              },
+            },
           },
-        },
+        ],
       },
       orderBy: {
         capacity: 'asc',
@@ -41,7 +68,6 @@ export class ReservationService {
         404,
       );
 
-    // have to calculate price..
     const totalPrice = await this.calculateTablePrice(
       tableAvailable.tableId,
       createReservationDto.members,
@@ -56,8 +82,19 @@ export class ReservationService {
         members: createReservationDto.members,
         totalHrs: createReservationDto.totalHrs,
         totalPrice: totalPrice,
+        bookingStartTime: timings.startTime,
+        bookingEndTime: timings.endTime,
       },
     });
+  }
+
+  async calculateTime(startTime: string, totalHrs: number) {
+    console.log('start time and duration is', startTime, totalHrs);
+    let time = new Date(startTime);
+    console.log('js object is ', time);
+    const endTime = new Date(time.getTime() + totalHrs * 60 * 60 * 1000);
+    console.log('js object is ', endTime);
+    return { startTime, endTime };
   }
 
   async calculateTablePrice(
@@ -76,7 +113,6 @@ export class ReservationService {
       let discountPrice = ((basePrice * hoursDiscount) / 100) * (totalHrs - 1);
       basePrice = basePrice - discountPrice;
     }
-
     return basePrice;
   }
 
