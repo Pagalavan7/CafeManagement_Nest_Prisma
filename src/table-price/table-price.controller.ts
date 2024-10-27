@@ -10,8 +10,11 @@ import {
 import { TablePriceService } from './table-price.service';
 import { CreateTablePriceDto } from './dto/create-table-price.dto';
 import { UpdateTablePriceDto } from './dto/update-table-price.dto';
+import { Roles } from 'src/common/roles.decorator';
+import { UserRole } from 'src/roles/dto/create-role.dto';
 
 @Controller('table-price')
+@Roles(UserRole.Manager)
 export class TablePriceController {
   constructor(private readonly tablePriceService: TablePriceService) {}
 

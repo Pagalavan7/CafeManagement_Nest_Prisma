@@ -32,7 +32,6 @@ export class PaymentService {
             orderId: createPaymentDto.orderId,
           },
         });
-        console.log('payments made for order', paymentsMadeForOrder);
 
         const result = paymentsMadeForOrder.filter(
           (x) => x.paymentStatusId === 1,
@@ -55,7 +54,7 @@ export class PaymentService {
             paymentStatusId: paymentStatus.paymentStatusId,
             paymentStatus: paymentStatus.paymentStatus.statusName,
           };
-          console.log(modifiedPaymentStatus);
+
           return modifiedPaymentStatus;
         } else
           throw new CustomException(
@@ -64,11 +63,10 @@ export class PaymentService {
           );
       }
       if (createPaymentDto.reservationId) {
-        console.log('reservation id is', createPaymentDto.reservationId);
         const reservation = await this.prisma.reservation.findFirst({
           where: { reservationId: createPaymentDto.reservationId },
         });
-        console.log('reservation is ', reservation);
+
         if (!reservation)
           throw new NotFoundException(
             `No reservation with id ${createPaymentDto.reservationId} is found`,
@@ -114,9 +112,7 @@ export class PaymentService {
           );
       }
     } catch (err) {
-      console.log(err);
       if (err instanceof NotFoundException) {
-        console.log(err);
         throw err;
       }
 

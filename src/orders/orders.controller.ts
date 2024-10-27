@@ -10,8 +10,11 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { UserRole } from 'src/roles/dto/create-role.dto';
+import { Roles } from 'src/common/roles.decorator';
 
 @Controller('orders')
+@Roles(UserRole.Manager, UserRole.Biller)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 

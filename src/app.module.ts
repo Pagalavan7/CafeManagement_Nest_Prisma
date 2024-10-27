@@ -17,6 +17,8 @@ import { AuthMiddleware } from './auth/auth.middleware';
 import { RolesModule } from './roles/roles.module';
 import { EmployeeModule } from './employee/employee.module';
 import { TablePriceModule } from './table-price/table-price.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
@@ -36,13 +38,20 @@ import { TablePriceModule } from './table-price/table-price.module';
     TablePriceModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // consumer
-    //   .apply(AuthMiddleware)
-    //   .exclude('/auth/signup', '/auth/login')
-    //   .forRoutes('*');
+    consumer
+      .apply(AuthMiddleware)
+      .exclude('/auth/signup', '/auth/login')
+      .forRoutes('*');
   }
 }

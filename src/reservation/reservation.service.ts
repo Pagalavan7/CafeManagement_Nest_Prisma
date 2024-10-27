@@ -88,11 +88,10 @@ export class ReservationService {
   }
 
   async calculateTime(startTime: string, totalHrs: number) {
-    console.log('start time and duration is', startTime, totalHrs);
     let time = new Date(startTime);
-    console.log('js object is ', time);
+
     const endTime = new Date(time.getTime() + totalHrs * 60 * 60 * 1000);
-    console.log('js object is ', endTime);
+
     return { startTime, endTime };
   }
 

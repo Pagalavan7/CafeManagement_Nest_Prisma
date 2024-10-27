@@ -8,10 +8,12 @@ import {
   Delete,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
-import { CreateRoleDto } from './dto/create-role.dto';
+import { CreateRoleDto, UserRole } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { Roles } from 'src/common/roles.decorator';
 
 @Controller('roles')
+@Roles(UserRole.Admin)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 

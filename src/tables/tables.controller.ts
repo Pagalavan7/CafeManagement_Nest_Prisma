@@ -10,8 +10,11 @@ import {
 import { TablesService } from './tables.service';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
+import { Roles } from 'src/common/roles.decorator';
+import { UserRole } from 'src/roles/dto/create-role.dto';
 
 @Controller('tables')
+@Roles(UserRole.Manager)
 export class TablesController {
   constructor(private readonly tablesService: TablesService) {}
 

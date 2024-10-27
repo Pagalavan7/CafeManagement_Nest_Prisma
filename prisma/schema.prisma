@@ -21,7 +21,7 @@ model User_Details{
   password String
   phoneNumber String
   address String
-  roleId Int @default(2)
+  roleId Int @default(8) //customer is default
   role Roles @relation(fields: [roleId],references: [roleId],onDelete: SetDefault,onUpdate: Cascade)
 
   employee Employee? 

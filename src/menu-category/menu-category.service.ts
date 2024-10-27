@@ -63,7 +63,6 @@ export class MenuCategoryService {
   }
   async update(id: number, updateMenuCategoryDto: UpdateMenuCategoryDto) {
     try {
-      console.log('update method called');
       const data = await this.prisma.menu_Category.update({
         where: {
           categoryId: id,

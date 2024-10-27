@@ -13,13 +13,28 @@ export class RolesGuard implements CanActivate {
         context.getClass(), // The current controller (optional)
       ],
     );
+    console.log('inside roles guard ..required roles are ..', requiredRoles);
+    if (!requiredRoles) {
+      return true;
+    } //if user role is undefined.. ie) if route guard not used.
 
-    if (!requiredRoles.length) return true;
+    if (!requiredRoles.length) return false; //if user role is null.. ie) if route guard with empty roles.
 
     const { user } = context.switchToHttp().getRequest();
 
     if (!user || !user.userRole) return false;
 
-    return requiredRoles.some((role) => user.userRole.includes(role));
+    //to access control to admin to all controllers except user Controller
+    if (
+      user.userRole.toLowerCase() === 'admin' &&
+      context.getClass().name !== 'UserDetailsController'
+    ) {
+      console.log('Admin access granted..');
+      return true;
+    }
+
+    return requiredRoles.some((role) =>
+      user.userRole.toLowerCase().includes(role.toLowerCase()),
+    );
   }
 }

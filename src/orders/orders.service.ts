@@ -41,7 +41,6 @@ export class OrdersService {
       const order = await this.prisma.order.findMany({});
       return order;
     } catch (err) {
-      console.log(err);
       throw new InternalServerErrorException('Something went wrong');
     }
   }

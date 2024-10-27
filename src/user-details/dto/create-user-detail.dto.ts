@@ -1,8 +1,9 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -10,12 +11,6 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-
-export enum UserRole {
-  Customer = 'CUSTOMER',
-  Admin = 'ADMIN',
-  Employee = 'EMPLOYEE',
-}
 
 export class CreateUserDetailDto {
   @IsString()
@@ -52,7 +47,8 @@ export class CreateUserDetailDto {
   //   }
   // })
 
-  // @IsEnum()
-  // @IsOptional()
-  // role: string;
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  roleId: number;
 }

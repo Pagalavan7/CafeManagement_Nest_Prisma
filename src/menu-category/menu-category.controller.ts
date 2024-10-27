@@ -10,8 +10,11 @@ import {
 import { MenuCategoryService } from './menu-category.service';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
+import { UserRole } from 'src/roles/dto/create-role.dto';
+import { Roles } from 'src/common/roles.decorator';
 
 @Controller('menu-category')
+@Roles(UserRole.Manager)
 export class MenuCategoryController {
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
 

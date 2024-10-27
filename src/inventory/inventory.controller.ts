@@ -10,8 +10,11 @@ import {
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
+import { Roles } from 'src/common/roles.decorator';
+import { UserRole } from 'src/roles/dto/create-role.dto';
 
 @Controller('inventory')
+@Roles(UserRole.Manager, UserRole.Chef)
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 

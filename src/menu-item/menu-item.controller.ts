@@ -13,11 +13,10 @@ import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/common/roles.decorator';
-import { UserRole } from 'src/user-details/dto/create-user-detail.dto';
+import { UserRole } from 'src/roles/dto/create-role.dto';
 
 @Controller('menu-item')
-@UseGuards(RolesGuard)
-@Roles(UserRole.Admin)
+@Roles(UserRole.Manager)
 export class MenuItemController {
   constructor(private readonly menuItemService: MenuItemService) {}
 

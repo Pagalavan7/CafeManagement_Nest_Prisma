@@ -19,7 +19,7 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: CustomRequest, res: Response, next: NextFunction) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) throw new CustomException('No Token found. ');
-    console.log('authheader is', authHeader);
+
     if (!authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Invalid token format');
     }

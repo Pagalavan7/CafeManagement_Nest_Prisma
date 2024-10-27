@@ -29,9 +29,9 @@ export class OrderItemsService {
       throw new NotFoundException(
         "Menu ID not found. Order items can't be added",
       );
-    console.log('menu item is', menuItem);
+
     const menuItemPrice = menuItem.price;
-    console.log('menu item price is ', menuItemPrice);
+
     const orderItem = await this.prisma.order_Item.create({
       data: { ...createOrderItemDto, price: menuItemPrice },
     });
@@ -88,14 +88,11 @@ export class OrderItemsService {
     });
     if (!orderItems.length)
       throw new NotFoundException(`No order items found for order ${orderId}`);
-    console.log(orderItems);
 
     let totalOrderAmount = orderItems.reduce((sum, item) => {
       sum = sum + item.price * item.quantity;
       return sum;
     }, 0);
-
-    console.log('total order amount is', totalOrderAmount);
 
     const order = await this.prisma.order.update({
       data: {
