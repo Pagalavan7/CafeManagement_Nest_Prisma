@@ -37,7 +37,6 @@ model Roles{
   role String @unique
   employee Employee[]
   user User_Details[]
-
 }
 
 model Employee{
@@ -155,5 +154,17 @@ model Reservation{
   totalPrice Float 
   reservationStatus String? 
   payment Payment[] 
+}
+
+//OAuth
+model Tenant_User {
+  tenantId      String   @id @default(uuid())
+  googleId      String   @unique
+  email         String   @unique
+  schemaName    String @unique
+  firstName     String
+  lastName      String
+  profilePicture String?
+  createdAt     DateTime @default(now())
 }
 

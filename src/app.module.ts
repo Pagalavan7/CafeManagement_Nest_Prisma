@@ -19,6 +19,9 @@ import { EmployeeModule } from './employee/employee.module';
 import { TablePriceModule } from './table-price/table-price.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/roles.guard';
+import { OauthModule } from './oauth/oauth.module';
+import { PassportModule } from '@nestjs/passport';
+import { GoogleStrategy } from './oauth/google.strategy';
 
 @Module({
   imports: [
@@ -36,6 +39,8 @@ import { RolesGuard } from './auth/roles.guard';
     RolesModule,
     EmployeeModule,
     TablePriceModule,
+    OauthModule,
+    PassportModule.register({ defaultStrategy: 'google' }),
   ],
   controllers: [AppController],
   providers: [
@@ -45,13 +50,19 @@ import { RolesGuard } from './auth/roles.guard';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    GoogleStrategy,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude('/auth/signup', '/auth/login')
+      .exclude(
+        '/auth/signup',
+        '/auth/login',
+        '/auth/google',
+        '/auth/google/callback',
+      )
       .forRoutes('*');
   }
 }
