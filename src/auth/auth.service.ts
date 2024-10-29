@@ -10,8 +10,6 @@ import { UserDetailsService } from 'src/user-details/user-details.service';
 import { JsonWebTokenService } from './jwt.service';
 import { LoginUserDTO } from './dto/login-user.dto';
 import { BcryptService } from './hash.service';
-import { RolesGuard } from './roles.guard';
-import { UpdateUserDetailDto } from 'src/user-details/dto/update-user-detail.dto';
 
 export interface TokenPayload {
   userFirstName: string;
@@ -28,7 +26,7 @@ export class AuthService {
     private bcryptService: BcryptService,
   ) {}
 
-  async createUser(createUserDTO: CreateUserDetailDto) {
+  async createUser(createUserDTO: CreateUserDetailDto, request: any) {
     const result = await this.userService.findUserByEmail(createUserDTO.email);
     if (result) {
       throw new ConflictException('User already present. Please log in.');
@@ -42,18 +40,23 @@ export class AuthService {
 
     const user = await this.userService.create(createUserDTO);
 
-    const payload: TokenPayload = {
+    const payload = {
       userFirstName: user.firstName,
       userLastName: user.lastName,
       userEmail: user.email,
       userRole: user.role.role,
+      tenantId: request.tenantId,
+      schemaName: request.schemaName,
     };
+
+    console.log('payload for signup token ', payload);
+
     const token = await this.JWTService.generateToken(payload);
     const { role, password, ...userData } = user; //no need of returning password to user..
     return { message: 'User created.', user: userData, token: token };
   }
 
-  async loginUser(loginUserDTO: LoginUserDTO) {
+  async loginUser(loginUserDTO: LoginUserDTO, request: any) {
     const user = await this.userService.findUserByEmail(loginUserDTO.email);
 
     if (!user) {
@@ -73,7 +76,15 @@ export class AuthService {
       );
     }
 
-    const payload = { userEmail: user.email, userRole: user.role.role };
+    const payload = {
+      userFirstName: user.firstName,
+      userLastName: user.lastName,
+      userEmail: user.email,
+      userRole: user.role.role,
+      tenantId: request.tenantId,
+      schemaName: request.schemaName,
+    };
+
     const token = await this.JWTService.generateToken(payload);
     return { message: 'User login successful.', token: token };
   }

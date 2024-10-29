@@ -58,8 +58,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthMiddleware)
       .exclude(
-        '/auth/signup',
-        '/auth/login',
+        // '/auth/signup',
+        // '/auth/login',
         '/auth/google',
         '/auth/google/callback',
       )

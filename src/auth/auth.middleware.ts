@@ -8,6 +8,7 @@ import { Request, Response, NextFunction } from 'express';
 import { TokenPayload } from './auth.service';
 import { JsonWebTokenService } from './jwt.service';
 import { CustomException } from 'src/common/customException';
+import { TenantPayload } from 'src/oauth/oauth.service';
 
 interface CustomRequest extends Request {
   user?: any;
@@ -25,7 +26,10 @@ export class AuthMiddleware implements NestMiddleware {
     }
     const token = authHeader.split(' ')[1];
 
-    const tokenPayload: TokenPayload = await this.jwtService.verifyToken(token);
+    const tokenPayload = await this.jwtService.verifyToken(token);
+
+    const schemaName = tokenPayload.schemaName;
+    //have to assign the schema name
 
     if (!tokenPayload) throw new ForbiddenException('Token is not valid');
     req.user = tokenPayload;

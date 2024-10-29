@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JsonWebTokenService } from '../auth/jwt.service';
-import { Sql } from '@prisma/client/runtime/library';
+import { PrismaClient } from '@prisma/client';
 
 export interface TenantPayload {
   tenantId: string;
@@ -14,7 +14,6 @@ export class OauthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JsonWebTokenService,
-    private sql: Sql,
   ) {}
 
   async getTenantByGoogleId(
@@ -32,16 +31,15 @@ export class OauthService {
       });
 
       if (!tenant) {
+        console.log('new user creation');
+
         //generate new schema name..
         const schemaName = `schema_${firstName}`;
         console.log(schemaName);
 
-        // const query = this.sql`CREATE SCHEMA ${this.sql.raw(schemaName)};`;
-        // console.log(query);
-
-        // await prisma.$executeRaw(query);
-
-        console.log(`Schema ${schemaName} created successfully.`);
+        await this.prisma.$executeRawUnsafe(
+          `EXEC ('CREATE SCHEMA [${schemaName}]');`,
+        );
 
         tenant = await this.prisma.tenant_User.create({
           data: {
@@ -53,6 +51,8 @@ export class OauthService {
             profilePicture,
           },
         });
+      } else {
+        console.log('user already found, data in tenant table is', tenant);
       }
 
       const tenantPayload: TenantPayload = {
@@ -62,7 +62,10 @@ export class OauthService {
       };
       //generate jwt token here
 
-      const token = this.jwtService.generateToken(tenantPayload);
+      console.log(tenantPayload);
+
+      const token = await this.jwtService.generateToken(tenantPayload);
+      console.log(token);
 
       // Send user data or JWT (if using) back to the client
       return {
