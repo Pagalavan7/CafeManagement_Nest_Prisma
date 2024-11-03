@@ -1,10 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
-  Scope,
-} from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
@@ -36,7 +30,9 @@ export class PrismaService extends PrismaClient {
     const schemaName = request.user?.schemaName;
     let databaseUrl = process.env.DATABASE_URL; // Base database URL from env
 
-    if (schemaName) databaseUrl = `${databaseUrl}?schema=${schemaName}`;
+    if (schemaName) {
+      databaseUrl = `${databaseUrl}?schema=${schemaName}`;
+    }
 
     super({
       datasources: {
@@ -162,7 +158,7 @@ export class PrismaService extends PrismaClient {
             await this.$executeRawUnsafe(uniqueSQL);
           });
 
-          //insertion for roles and payment status..
+          await this.defaultValuesInsertion(targetSchema);
         },
         { timeout: 15000 },
       );
@@ -171,5 +167,22 @@ export class PrismaService extends PrismaClient {
       console.error('Error creating schema:', err);
       throw err;
     }
+  }
+
+  async defaultValuesInsertion(targetSchema: string) {
+    // Construct the SQL query string using template literals for schema names
+    const insertRolesQuery = `
+      INSERT INTO "${targetSchema}"."Roles" ("roleId", "role")
+      VALUES (1, 'Admin'), (2, 'Customer'), (3, 'Employee')
+    `;
+
+    const insertPaymentStatusQuery = `
+      INSERT INTO "${targetSchema}"."Payment_Status" ("statusId", "statusName")
+      VALUES (1, 'SUCCESS'), (2, 'PENDING'), (3, 'FAILED')
+    `;
+
+    // Execute raw queries
+    await this.$executeRawUnsafe(insertRolesQuery);
+    await this.$executeRawUnsafe(insertPaymentStatusQuery);
   }
 }

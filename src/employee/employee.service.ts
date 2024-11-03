@@ -3,6 +3,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDetailsService } from 'src/user-details/user-details.service';
+import { CreateUserDto } from 'src/auth/dto/create-user.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -12,13 +13,14 @@ export class EmployeeService {
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto) {
-    const { employeeRoleId, ...createUserDTO } = createEmployeeDto;
+    let { employeeRoleId, ...createUserDTO } = createEmployeeDto;
 
     const isUserPresent = await this.userService.findUserByEmail(
       createUserDTO.email,
     );
     if (!isUserPresent) {
-      const { userId } = await this.userService.create(createUserDTO);
+      createUserDTO = { ...createUserDTO, roleId: 3 };
+      const { userId } = await this.userService.create(createUserDTO); //sending default role id..
       return await this.prisma.employee.create({
         data: {
           employeeRoleId: employeeRoleId,
