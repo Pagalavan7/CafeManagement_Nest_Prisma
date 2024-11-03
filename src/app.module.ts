@@ -44,8 +44,8 @@ import { GoogleStrategy } from './oauth/google.strategy';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     PrismaService,
+    AppService,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

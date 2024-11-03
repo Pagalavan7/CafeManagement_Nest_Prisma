@@ -13,7 +13,7 @@ export class RolesGuard implements CanActivate {
         context.getClass(), // The current controller (optional)
       ],
     );
-    console.log('inside roles guard ..required roles are ..', requiredRoles);
+
     if (!requiredRoles) {
       return true;
     } //if user role is undefined.. ie) if route guard not used.
@@ -29,7 +29,6 @@ export class RolesGuard implements CanActivate {
       user.userRole.toLowerCase() === 'admin' &&
       context.getClass().name !== 'UserDetailsController'
     ) {
-      console.log('Admin access granted..');
       return true;
     }
 

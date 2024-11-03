@@ -21,14 +21,12 @@ export class AuthController {
     @Body() createUserDto: CreateUserDetailDto,
     @Req() request: any,
   ) {
-    console.log('inside auth signup controller');
     console.log(createUserDto, request.user);
     return await this.authService.createUser(createUserDto, request.user);
   }
 
   @Post('login')
   async login(@Body() loginUserDTO: LoginUserDTO, @Req() request: any) {
-    console.log('inside auth login controller');
     console.log(loginUserDTO, request.user);
     return await this.authService.loginUser(loginUserDTO, request.user);
   }

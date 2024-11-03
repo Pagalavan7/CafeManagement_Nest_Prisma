@@ -28,15 +28,15 @@ export class UserDetailsService {
       });
       return user;
     } catch (error) {
-      console.error('error is ', error); // Logging the full error to understand its structure
-
+      console.log(error || error.message);
       if (error.code === 'P2002') {
         //P2002 is prisma's unique constraint error.
         throw new ConflictException('Email already exists');
       }
 
-      throw new InternalServerErrorException('Something went wrong');
-      // throw new CustomException(error.message);
+      throw new InternalServerErrorException({
+        message: 'Something went wrong',
+      });
     }
   }
 
@@ -46,25 +46,30 @@ export class UserDetailsService {
       if (!user.length) throw new NotFoundException('No users found.');
       return user;
     } catch (err) {
+      console.log(err);
       if (err instanceof NotFoundException) {
-        throw err; // Re-throw to propagate it further
+        throw err;
       }
-
       throw new InternalServerErrorException('Something went wrong');
     }
   }
 
   async findUserByEmail(email: string) {
-    return this.prisma.user_Details.findFirst({
-      where: {
-        email: email,
-      },
-      include: {
-        role: {
-          select: { role: true },
+    try {
+      return this.prisma.user_Details.findFirst({
+        where: {
+          email: email,
         },
-      },
-    });
+        include: {
+          role: {
+            select: { role: true },
+          },
+        },
+      });
+    } catch (err) {
+      console.log(err.message || err);
+      throw err;
+    }
   }
 
   async findOne(id: number) {

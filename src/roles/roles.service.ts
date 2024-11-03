@@ -8,9 +8,14 @@ export class RolesService {
   constructor(private prisma: PrismaService) {}
 
   async create(createRoleDto: CreateRoleDto) {
-    return await this.prisma.roles.create({
-      data: { ...createRoleDto },
-    });
+    try {
+      return await this.prisma.roles.create({
+        data: { ...createRoleDto },
+      });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   async findAll() {

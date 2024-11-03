@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,7 +21,7 @@ model User_Details{
   password String
   phoneNumber String
   address String
-  roleId Int @default(8) //customer is default
+  roleId Int @default(2) //User is default
   role Roles @relation(fields: [roleId],references: [roleId],onDelete: SetDefault,onUpdate: Cascade)
 
   employee Employee? 

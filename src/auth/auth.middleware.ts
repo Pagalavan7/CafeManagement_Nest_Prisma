@@ -9,14 +9,17 @@ import { TokenPayload } from './auth.service';
 import { JsonWebTokenService } from './jwt.service';
 import { CustomException } from 'src/common/customException';
 import { TenantPayload } from 'src/oauth/oauth.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
   user?: any;
 }
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private jwtService: JsonWebTokenService) {}
+  constructor(private jwtService: JsonWebTokenService) {
+    console.log('AuthMiddleware is called');
+  }
   async use(req: CustomRequest, res: Response, next: NextFunction) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) throw new CustomException('No Token found. ');
@@ -28,11 +31,10 @@ export class AuthMiddleware implements NestMiddleware {
 
     const tokenPayload = await this.jwtService.verifyToken(token);
 
-    const schemaName = tokenPayload.schemaName;
-    //have to assign the schema name
-
     if (!tokenPayload) throw new ForbiddenException('Token is not valid');
     req.user = tokenPayload;
+
+    // await this.prisma.connectSchema(tokenPayload.schemaName);
 
     next();
   }

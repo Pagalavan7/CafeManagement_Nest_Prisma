@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDetailDto } from 'src/user-details/dto/create-user-detail.dto';
 import { UserDetailsService } from 'src/user-details/user-details.service';
@@ -27,65 +26,78 @@ export class AuthService {
   ) {}
 
   async createUser(createUserDTO: CreateUserDetailDto, request: any) {
-    const result = await this.userService.findUserByEmail(createUserDTO.email);
-    if (result) {
-      throw new ConflictException('User already present. Please log in.');
+    try {
+      const result = await this.userService.findUserByEmail(
+        createUserDTO.email,
+      );
+      if (result) {
+        throw new ConflictException('User already present. Please log in.');
+      }
+
+      const hashedPassword = await this.bcryptService.hashPassword(
+        createUserDTO.password,
+      );
+
+      createUserDTO = { ...createUserDTO, password: hashedPassword };
+
+      const user = await this.userService.create(createUserDTO);
+
+      const payload = {
+        userFirstName: user.firstName,
+        userLastName: user.lastName,
+        userEmail: user.email,
+        userRole: user.role.role,
+        tenantId: request.tenantId,
+        schemaName: request.schemaName,
+      };
+
+      console.log('payload for signup token ', payload);
+
+      const token = await this.JWTService.generateToken(payload);
+      const { role, password, ...userData } = user; //no need of returning password to user..
+      return { message: 'User created.', user: userData, token: token };
+    } catch (err) {
+      throw err;
     }
-
-    const hashedPassword = await this.bcryptService.hashPassword(
-      createUserDTO.password,
-    );
-
-    createUserDTO = { ...createUserDTO, password: hashedPassword };
-
-    const user = await this.userService.create(createUserDTO);
-
-    const payload = {
-      userFirstName: user.firstName,
-      userLastName: user.lastName,
-      userEmail: user.email,
-      userRole: user.role.role,
-      tenantId: request.tenantId,
-      schemaName: request.schemaName,
-    };
-
-    console.log('payload for signup token ', payload);
-
-    const token = await this.JWTService.generateToken(payload);
-    const { role, password, ...userData } = user; //no need of returning password to user..
-    return { message: 'User created.', user: userData, token: token };
   }
 
   async loginUser(loginUserDTO: LoginUserDTO, request: any) {
-    const user = await this.userService.findUserByEmail(loginUserDTO.email);
+    try {
+      console.log('inside login user service..');
 
-    if (!user) {
-      throw new NotFoundException(
-        'User not found. Please sign up to continue.',
+      const user = await this.userService.findUserByEmail(loginUserDTO.email);
+      console.log(user, ' is the user');
+      if (!user) {
+        throw new NotFoundException(
+          'User not found. Please sign up to continue.',
+        );
+      }
+
+      const isPasswordValid = await this.bcryptService.comparePassword(
+        loginUserDTO.password,
+        user.password,
       );
+
+      if (!isPasswordValid) {
+        throw new UnauthorizedException(
+          'Invalid credentials. Please check your password.',
+        );
+      }
+
+      const payload = {
+        userFirstName: user.firstName,
+        userLastName: user.lastName,
+        userEmail: user.email,
+        userRole: user.role.role,
+        tenantId: request.tenantId,
+        schemaName: request.schemaName,
+      };
+
+      const token = await this.JWTService.generateToken(payload);
+      return { message: 'User login successful.', token: token };
+    } catch (err) {
+      console.log(err || err.message);
+      if (err instanceof NotFoundException) throw err;
     }
-
-    const isPasswordValid = await this.bcryptService.comparePassword(
-      loginUserDTO.password,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException(
-        'Invalid credentials. Please check your password.',
-      );
-    }
-
-    const payload = {
-      userFirstName: user.firstName,
-      userLastName: user.lastName,
-      userEmail: user.email,
-      userRole: user.role.role,
-      tenantId: request.tenantId,
-      schemaName: request.schemaName,
-    };
-
-    const token = await this.JWTService.generateToken(payload);
-    return { message: 'User login successful.', token: token };
   }
 }

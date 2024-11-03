@@ -8,6 +8,7 @@ import { JsonWebTokenService } from './jwt.service';
 import { BcryptService } from './hash.service';
 import { AuthMiddleware } from './auth.middleware';
 import { RolesGuard } from './roles.guard';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RolesGuard } from './roles.guard';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60m' },
     }),
+    PrismaModule,
   ],
   controllers: [AuthController],
   providers: [

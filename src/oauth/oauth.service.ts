@@ -31,15 +31,13 @@ export class OauthService {
       });
 
       if (!tenant) {
-        console.log('new user creation');
+        console.log('new tenant and schema creation');
 
         //generate new schema name..
         const schemaName = `schema_${firstName}`;
         console.log(schemaName);
 
-        await this.prisma.$executeRawUnsafe(
-          `EXEC ('CREATE SCHEMA [${schemaName}]');`,
-        );
+        this.prisma.createSchema(schemaName);
 
         tenant = await this.prisma.tenant_User.create({
           data: {
@@ -60,20 +58,16 @@ export class OauthService {
         tenantEmail: tenant.email,
         schemaName: tenant.schemaName,
       };
-      //generate jwt token here
 
       console.log(tenantPayload);
 
       const token = await this.jwtService.generateToken(tenantPayload);
       console.log(token);
 
-      // Send user data or JWT (if using) back to the client
       return {
-        message: 'New schema created.',
         jwtToken: token,
       };
     } catch (error) {
-      console.error('Error creating schema:', error);
       throw new Error('Failed to create schema');
     }
   }
