@@ -18,7 +18,8 @@ export class RolesGuard implements CanActivate {
       return true;
     } //if user role is undefined.. ie) if route guard not used.
 
-    if (!requiredRoles.length) return false; //if user role is null.. ie) if route guard with empty roles.
+    if (!requiredRoles.length) return false; //if user role is null..
+    // ie) if route guard with empty roles.
 
     const { user } = context.switchToHttp().getRequest();
 

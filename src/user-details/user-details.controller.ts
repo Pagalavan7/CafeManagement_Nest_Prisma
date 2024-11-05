@@ -12,7 +12,6 @@ import { UserDetailsService } from './user-details.service';
 import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
 import { Roles } from 'src/common/roles.decorator';
 import { UserRole } from 'src/roles/dto/create-role.dto';
-import { TokenPayload } from 'src/auth/auth.service';
 
 @Controller('user-details')
 export class UserDetailsController {

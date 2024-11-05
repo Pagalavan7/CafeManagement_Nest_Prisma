@@ -173,7 +173,7 @@ export class PrismaService extends PrismaClient {
     // Construct the SQL query string using template literals for schema names
     const insertRolesQuery = `
       INSERT INTO "${targetSchema}"."Roles" ("roleId", "role")
-      VALUES (1, 'Admin'), (2, 'Customer'), (3, 'Employee')
+      VALUES (1, 'Admin'), (2, 'Customer'), (3, 'Employee'), (4,'Manager')
     `;
 
     const insertPaymentStatusQuery = `
