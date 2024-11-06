@@ -170,19 +170,27 @@ export class PrismaService extends PrismaClient {
   }
 
   async defaultValuesInsertion(targetSchema: string) {
-    // Construct the SQL query string using template literals for schema names
-    const insertRolesQuery = `
+    try {
+      const insertRolesQuery = `
       INSERT INTO "${targetSchema}"."Roles" ("roleId", "role")
-      VALUES (1, 'Admin'), (2, 'Customer'), (3, 'Employee'), (4,'Manager')
+      VALUES (1, 'Admin'), (2, 'Customer'), (3, 'Employee'), (4, 'Manager')
     `;
 
-    const insertPaymentStatusQuery = `
+      const insertPaymentStatusQuery = `
       INSERT INTO "${targetSchema}"."Payment_Status" ("statusId", "statusName")
       VALUES (1, 'SUCCESS'), (2, 'PENDING'), (3, 'FAILED')
     `;
+      // Construct the SQL query string using template literals for schema names
 
-    // Execute raw queries
-    await this.$executeRawUnsafe(insertRolesQuery);
-    await this.$executeRawUnsafe(insertPaymentStatusQuery);
+      // Use transaction for consistency
+      await this.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe(insertRolesQuery);
+        await tx.$executeRawUnsafe(insertPaymentStatusQuery);
+      });
+      console.log('Default values inserted successfully');
+    } catch (error) {
+      console.error('Error inserting default values:', error);
+      throw new Error('Default values insertion failed');
+    }
   }
 }
