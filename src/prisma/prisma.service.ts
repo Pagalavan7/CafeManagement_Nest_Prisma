@@ -28,7 +28,7 @@ export class PrismaService extends PrismaClient {
   constructor(@Inject(REQUEST) private request: CustomRequest) {
     console.log('prisma service constructor called.');
     const schemaName = request.user?.schemaName;
-    let databaseUrl = process.env.DATABASE_URL; // Base database URL from env
+    let databaseUrl = process.env.DATABASE_URL;
 
     if (schemaName) {
       databaseUrl = `${databaseUrl}?schema=${schemaName}`;

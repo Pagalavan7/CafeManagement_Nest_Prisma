@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
   getHello(): string {
-    return 'Hello World!';
+    try {
+      // throw new ForbiddenException('random error generating');
+      return 'testing';
+    } catch (err) {
+      throw err;
+    }
   }
 }

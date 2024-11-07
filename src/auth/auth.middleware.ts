@@ -17,12 +17,14 @@ export interface CustomRequest extends Request {
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private jwtService: JsonWebTokenService) {
-    console.log('AuthMiddleware is called');
-  }
+  constructor(
+    private jwtService: JsonWebTokenService,
+    private prisma: PrismaService,
+  ) {}
   async use(req: CustomRequest, res: Response, next: NextFunction) {
+    console.log('inside auth middleware..');
     const authHeader = req.headers['authorization'];
-    if (!authHeader) throw new CustomException('No Token found. ');
+    if (!authHeader) throw new UnauthorizedException('No Token found.');
 
     if (!authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Invalid token format');
@@ -33,8 +35,6 @@ export class AuthMiddleware implements NestMiddleware {
 
     if (!tokenPayload) throw new ForbiddenException('Token is not valid');
     req.user = tokenPayload;
-
-    // await this.prisma.connectSchema(tokenPayload.schemaName);
 
     next();
   }
