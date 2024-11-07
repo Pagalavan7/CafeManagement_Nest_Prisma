@@ -2,9 +2,8 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
-import { async } from 'rxjs';
+
 import { CustomRequest } from 'src/auth/auth.middleware';
-// import { CustomRequest } from 'src/auth/auth.middleware';
 
 interface TableColumn {
   table_name: string;
@@ -28,7 +27,7 @@ export class PrismaService extends PrismaClient {
   constructor(@Inject(REQUEST) private request: CustomRequest) {
     console.log('prisma service constructor called.');
     const schemaName = request.user?.schemaName;
-    let databaseUrl = process.env.DATABASE_URL;
+    let databaseUrl = process.env.DATABASE_URL; // Base database URL from env
 
     if (schemaName) {
       databaseUrl = `${databaseUrl}?schema=${schemaName}`;
@@ -75,7 +74,6 @@ export class PrismaService extends PrismaClient {
               };
             }
 
-            // Enclose column names and constraints in double quotes for case sensitivity
             const columnDef = `"${col.column_name}" ${col.data_type}${
               col.character_maximum_length
                 ? `(${col.character_maximum_length})`
@@ -116,11 +114,22 @@ export class PrismaService extends PrismaClient {
             const primaryKeys = tableDefinitions[tableName].primaryKeys;
             if (primaryKeys.length > 0) {
               const primaryKeySQL = `ALTER TABLE "${sanitizedSchema}"."${tableName}" ADD CONSTRAINT "${tableName}_pkey" PRIMARY KEY (${primaryKeys.join(', ')});`;
-              await this.$executeRawUnsafe(primaryKeySQL);
+
+              try {
+                await this.$executeRawUnsafe(primaryKeySQL);
+              } catch (error) {
+                if (error.meta?.code === '42710') {
+                  console.warn(
+                    `Primary key constraint for ${tableName} already exists, skipping.`,
+                  );
+                } else {
+                  throw error; // Ensures transaction rollback if error occurs
+                }
+              }
             }
           }
 
-          // Step 7: Retrieve foreign key constraints from the public schema
+          // Step 8: Apply foreign key constraints
           const foreignKeys = await this.$queryRaw<TableConstraint[]>`
             SELECT
               tc.table_name,
@@ -137,13 +146,23 @@ export class PrismaService extends PrismaClient {
               tc.table_schema = 'public' AND tc.constraint_type = 'FOREIGN KEY'
               AND tc.table_name != 'Tenant_User';`;
 
-          // Step 8: Apply foreign key constraints
           for (const fk of foreignKeys) {
             const foreignKeySQL = `ALTER TABLE "${sanitizedSchema}"."${fk.table_name}" ADD CONSTRAINT "${fk.table_name}_${fk.column_name}_fkey" FOREIGN KEY ("${fk.column_name}") REFERENCES "${sanitizedSchema}"."${fk.foreign_table_name}"("${fk.foreign_column_name}");`;
-            await this.$executeRawUnsafe(foreignKeySQL);
+
+            try {
+              await this.$executeRawUnsafe(foreignKeySQL);
+            } catch (error) {
+              if (error.meta?.code === '42710') {
+                console.warn(
+                  `Foreign key constraint "${fk.table_name}_${fk.column_name}_fkey" already exists, skipping.`,
+                );
+              } else {
+                throw error;
+              }
+            }
           }
 
-          // Step 9: Retrieve unique constraints from the public schema
+          // Step 10: Apply unique constraints
           const uniqueConstraints = await this.$queryRaw<TableConstraint[]>`
             SELECT tc.table_name, kcu.column_name
             FROM information_schema.table_constraints AS tc
@@ -152,16 +171,28 @@ export class PrismaService extends PrismaClient {
             WHERE tc.table_schema = 'public' AND tc.constraint_type = 'UNIQUE'
             AND tc.table_name != 'Tenant_User';`;
 
-          // Step 10: Apply unique constraints
           uniqueConstraints.forEach(async (uc) => {
             const uniqueSQL = `ALTER TABLE "${sanitizedSchema}"."${uc.table_name}" ADD CONSTRAINT "${uc.table_name}_${uc.column_name}_unique" UNIQUE ("${uc.column_name}");`;
-            await this.$executeRawUnsafe(uniqueSQL);
+
+            try {
+              await this.$executeRawUnsafe(uniqueSQL);
+            } catch (error) {
+              if (error.meta?.code === '42710') {
+                console.warn(
+                  `Unique constraint for ${uc.table_name}.${uc.column_name} already exists, skipping.`,
+                );
+              } else {
+                throw error;
+              }
+            }
           });
 
-          await this.defaultValuesInsertion(targetSchema);
+          // Insertion of default values
+          await this.defaultValuesInsertion(sanitizedSchema);
         },
-        { timeout: 15000 },
+        { timeout: 50000 },
       );
+
       console.log('Schema creation complete.');
     } catch (err) {
       console.error('Error creating schema:', err);
@@ -170,6 +201,7 @@ export class PrismaService extends PrismaClient {
   }
 
   async defaultValuesInsertion(targetSchema: string) {
+    console.log('default value insertion..', targetSchema);
     try {
       const insertRolesQuery = `
       INSERT INTO "${targetSchema}"."Roles" ("roleId", "role")
@@ -192,5 +224,18 @@ export class PrismaService extends PrismaClient {
       console.error('Error inserting default values:', error);
       throw new Error('Default values insertion failed');
     }
+  }
+
+  async schemaExists(schemaName: string): Promise<boolean> {
+    console.log('checking schema exists ***************');
+    const result = await this.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM pg_namespace
+        WHERE nspname = ${schemaName}
+      ) as "exists";
+    `;
+    console.log('result of schema exists.. ', result[0]?.exists ?? false);
+    return result[0]?.exists ?? false;
   }
 }
