@@ -8,7 +8,6 @@ import { CreateUserDetailDto } from './dto/create-user-detail.dto';
 import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomException } from 'src/common/customException';
-import { TokenPayload } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserDetailsService {
@@ -94,7 +93,7 @@ export class UserDetailsService {
   async update(
     id: number,
     updateUserDetailDto: UpdateUserDetailDto,
-    user: TokenPayload,
+    user: any,
   ) {
     try {
       const userDetails = await this.findOne(id);
