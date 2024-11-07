@@ -102,7 +102,7 @@ export class UserDetailsService {
       //validating the user logged in is updating his details..
       //he should not update other's details
 
-      if (userDetails.email === user.userEmail) {
+      if (userDetails.userId === user.userId) {
         return await this.prisma.user_Details.update({
           data: {
             ...updateUserDetailDto,

@@ -42,21 +42,19 @@ export class AuthService {
 
       const user = await this.userService.create(createUserDTO);
 
-      const payload = {
-        userFirstName: user.firstName,
-        userLastName: user.lastName,
-        userEmail: user.email,
-        userRole: user.role.role,
-        tenantId: request.tenantId,
-        schemaName: request.schemaName,
-      };
+      const payload = await this.generatePayload(user, request);
 
       console.log('payload for signup token ', payload);
 
       const token = await this.JWTService.generateToken(payload);
       const { role, password, ...userData } = user; //no need of returning password to user..
-      return { message: 'User created.', user: userData, token: token };
+      return {
+        message: 'User creation successful.',
+        userToken: token,
+        user: userData,
+      };
     } catch (err) {
+      console.log(err);
       throw err;
     }
   }
@@ -83,21 +81,26 @@ export class AuthService {
           'Invalid credentials. Please check your password.',
         );
       }
-
-      const payload = {
-        userFirstName: user.firstName,
-        userLastName: user.lastName,
-        userEmail: user.email,
-        userRole: user.role.role,
-        tenantId: request.tenantId,
-        schemaName: request.schemaName,
-      };
+      const payload = await this.generatePayload(user, request);
 
       const token = await this.JWTService.generateToken(payload);
-      return { message: 'User login successful.', token: token };
+      return { message: 'User login successful.', userToken: token };
     } catch (err) {
       console.log(err || err.message);
       if (err instanceof NotFoundException) throw err;
     }
+  }
+
+  async generatePayload(user, request) {
+    const payload = {
+      userId: user.userId,
+      userFirstName: user.firstName,
+      userLastName: user.lastName,
+      userEmail: user.email,
+      userRole: user.role.role,
+      tenantId: request.tenantId,
+      schemaName: request.schemaName,
+    };
+    return payload;
   }
 }

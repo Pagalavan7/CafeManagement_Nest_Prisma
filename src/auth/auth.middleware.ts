@@ -22,20 +22,25 @@ export class AuthMiddleware implements NestMiddleware {
     private prisma: PrismaService,
   ) {}
   async use(req: CustomRequest, res: Response, next: NextFunction) {
-    console.log('inside auth middleware..');
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) throw new UnauthorizedException('No Token found.');
+    try {
+      console.log('inside auth middleware..');
+      const authHeader = req.headers['authorization'];
+      if (!authHeader) throw new UnauthorizedException('No Token found.');
 
-    if (!authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Invalid token format');
+      if (!authHeader.startsWith('Bearer ')) {
+        throw new UnauthorizedException('Invalid token format');
+      }
+      const token = authHeader.split(' ')[1];
+
+      const tokenPayload = await this.jwtService.verifyToken(token);
+
+      if (!tokenPayload) throw new ForbiddenException('Token is not valid');
+      req.user = tokenPayload;
+
+      next();
+    } catch (err) {
+      console.log('Error in middleware,...', err.message || err);
+      throw err;
     }
-    const token = authHeader.split(' ')[1];
-
-    const tokenPayload = await this.jwtService.verifyToken(token);
-
-    if (!tokenPayload) throw new ForbiddenException('Token is not valid');
-    req.user = tokenPayload;
-
-    next();
   }
 }
